@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#F4F7FC">
+
+    <!-- ========================================================= -->
+    <!-- TOP SCROLLABLE CONTENT -->
+    <!-- ========================================================= -->
+    <ScrollView
+        android:id="@+id/scrollArea"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottomNav"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- TOP BLUE HEADER -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="130dp"
+                android:background="@drawable/home_page_top_section"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/pageTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Organizations"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+
+                <!-- Search bar background -->
+                <RelativeLayout
+                    android:id="@+id/searchBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/pageTitle"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/search_box_bg"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:id="@+id/searchIcon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/search_icon"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#AFC4FF" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@id/searchIcon"
+                        android:layout_marginStart="12dp"
+                        android:hint="Search organizations..."
+                        android:textSize="14sp"
+                        android:background="@android:color/transparent"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#AFC4FF"
+                        android:layout_centerVertical="true"/>
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+
+            <!-- WHITE CONTENT AREA -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@android:color/white"
+                android:padding="20dp">
+
+                <!-- Join New Organization Card -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/join_organisation_card"
+                    android:padding="16dp"
+                    android:layout_marginBottom="18dp"
+                    >
+
+                    <!-- Title -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/plus_icon"
+                            app:tint="#2F80FF" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Join New Organization"
+                            android:textColor="#001542"
+                            android:textSize="11sp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+
+                    <!-- Join code input -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:orientation="horizontal"
+                        android:background="@drawable/action_card"
+                        android:paddingHorizontal="12dp"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="14dp">
+
+                        <EditText
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:hint="Enter organization join code"
+                            android:textSize="13sp"
+                            android:textColor="#001542"
+                            android:textColorHint="#8293B5"
+                            android:background="@android:color/transparent"/>
+
+                    </LinearLayout>
+
+                    <!-- Create new org button -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/create_organisation_button"
+                        android:layout_marginTop="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Create New Organization"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp"
+                            android:layout_centerInParent="true"
+                            android:translationX="10dp"/>
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <!-- Your Organizations -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Your Organizations"
+                    android:textSize="17sp"
+                    android:textColor="#001542"
+                    />
+
+
+                <!-- =========================================================== -->
+                <!-- ORG LIST RECYCLERVIEW -->
+                <!-- =========================================================== -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/orgRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    tools:listitem="@layout/org_list_item"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+    <!-- ========================================================= -->
+    <!-- FIXED BOTTOM NAVIGATION BAR -->
+    <!-- ========================================================= -->
+
+    <RelativeLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:paddingHorizontal="30dp"
+        android:paddingTop="8dp"
+        android:background="@color/white"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="5"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Home -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/home"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Home"
+                    android:textColor="#7A8FA6"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+            <!-- Teams -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/building_active"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Organisations"
+                    android:textColor="#2F80FF"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+            <!-- Tasks -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/task"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tasks"
+                    android:textColor="#7A8FA6"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+            <!-- Notifications -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/bell"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Notifications"
+                    android:textColor="#7A8FA6"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+            <!-- Profile -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/profile_icon"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Profile"
+                    android:textColor="#7A8FA6"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fillViewport="true"
+    android:background="#F4F7FC">
+    
+    <ScrollView
+        android:id="@+id/scrollContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- TOP SECTION -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                android:background="@drawable/home_page_top_section">
+
+
+                <!-- Profile picture -->
+                <RelativeLayout
+                    android:id="@+id/ivProfile"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/profile_button"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="15dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:layout_centerInParent="true"
+                        android:textColor="@color/white">
+
+                    </TextView>
+                </RelativeLayout>
+
+
+
+                <ImageView
+                    android:id="@+id/ivNotificationButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/notification_button"
+                    android:layout_toStartOf="@id/ivProfile"
+                    android:layout_marginTop="15dp"
+                    />
+
+                <!-- Hello Text -->
+                <TextView
+                    android:id="@+id/tvHello"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hello, Ahmed"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:layout_marginTop="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ready to manage your team?"
+                    android:textColor="#AFC4FF"
+                    android:textSize="12sp"
+                    android:layout_below="@id/tvHello"
+                    />
+
+                <!-- STATS GRID -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginTop="60dp"
+                    >
+
+                    <!-- LEFT COLUMN -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <!-- Active Tasks -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="80dp"
+                            android:orientation="vertical"
+                            android:background="@drawable/stat_card"
+                            android:padding="12dp"
+                            android:id="@+id/active_tasks_card">
+
+                            <RelativeLayout
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="@drawable/blue_square"
+                                android:layout_centerVertical="true"
+                                android:id="@+id/clock_icon">
+
+                                <ImageView
+                                    android:src="@drawable/clock_icon"
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
+                                    android:layout_centerInParent="true" />
+
+                            </RelativeLayout>
+
+                            <RelativeLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toEndOf="@id/clock_icon"
+                                android:layout_centerVertical="true"
+                                android:paddingStart="8dp"
+                                >
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+
+                                    android:textColor="@android:color/white"
+                                    android:textSize="22sp"
+                                    android:id="@+id/task_count"
+                                    android:textStyle="bold"
+                                    >
+
+
+                                </TextView>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Active Tasks"
+                                    android:textColor="#AFC4FF"
+                                    android:textSize="12sp"
+                                    android:layout_below="@id/task_count"
+                                    >
+
+                                </TextView>
+
+
+
+                            </RelativeLayout>
+
+
+                            <!--<TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="12"
+                                android:textColor="@android:color/white"
+                                android:textSize="20sp"
+                                android:layout_marginTop="6dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Active Tasks"
+                                android:textColor="#AFC4FF"
+                                android:textSize="13sp" />-->
+                        </RelativeLayout>
+
+                        <!-- Pending -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="80dp"
+                            android:orientation="vertical"
+                            android:background="@drawable/stat_card"
+                            android:padding="12dp"
+                            android:id="@+id/pending_tasks_card"
+                            android:layout_below="@id/active_tasks_card"
+                            android:layout_marginTop="15dp"
+                            >
+
+                            <RelativeLayout
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="@drawable/orange_square"
+                                android:layout_centerVertical="true"
+                                android:id="@+id/warning_icon">
+
+                                <ImageView
+                                    android:src="@drawable/warning_icon"
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
+                                    android:layout_centerInParent="true" />
+
+                            </RelativeLayout>
+
+                            <RelativeLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toEndOf="@id/warning_icon"
+                                android:layout_centerVertical="true"
+                                android:paddingStart="8dp"
+                                >
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="22sp"
+                                    android:id="@+id/pending_count"
+                                    android:textStyle="bold"
+                                    >
+
+
+                                </TextView>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Pending"
+                                    android:textColor="#AFC4FF"
+                                    android:textSize="12sp"
+                                    android:layout_below="@id/pending_count"
+                                    >
+
+                                </TextView>
+
+
+
+                            </RelativeLayout>
+
+
+                            <!--<TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="12"
+                                android:textColor="@android:color/white"
+                                android:textSize="20sp"
+                                android:layout_marginTop="6dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Active Tasks"
+                                android:textColor="#AFC4FF"
+                                android:textSize="13sp" />-->
+                        </RelativeLayout>
+                    </RelativeLayout>
+
+                    <!-- RIGHT COLUMN -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <!-- Active Tasks -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="80dp"
+                            android:orientation="vertical"
+                            android:background="@drawable/stat_card"
+                            android:padding="12dp"
+                            android:id="@+id/completed_tasks_card">
+
+                            <RelativeLayout
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="@drawable/green_square"
+                                android:layout_centerVertical="true"
+                                android:id="@+id/tick_icon">
+
+                                <ImageView
+                                    android:src="@drawable/tick_icon"
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
+                                    android:layout_centerInParent="true" />
+
+                            </RelativeLayout>
+
+                            <RelativeLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toEndOf="@id/tick_icon"
+                                android:layout_centerVertical="true"
+                                android:paddingStart="8dp"
+                                >
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+
+                                    android:textColor="@android:color/white"
+                                    android:textSize="22sp"
+                                    android:id="@+id/completed_count"
+                                    android:textStyle="bold"
+                                    >
+
+
+                                </TextView>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Completed"
+                                    android:textColor="#AFC4FF"
+                                    android:textSize="12sp"
+                                    android:layout_below="@id/completed_count"
+                                    >
+
+                                </TextView>
+
+
+
+                            </RelativeLayout>
+
+
+                            <!--<TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="12"
+                                android:textColor="@android:color/white"
+                                android:textSize="20sp"
+                                android:layout_marginTop="6dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Active Tasks"
+                                android:textColor="#AFC4FF"
+                                android:textSize="13sp" />-->
+                        </RelativeLayout>
+
+                        <!-- Pending -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="80dp"
+                            android:orientation="vertical"
+                            android:background="@drawable/stat_card"
+                            android:padding="12dp"
+                            android:id="@+id/completion_rate_card"
+                            android:layout_below="@id/completed_tasks_card"
+                            android:layout_marginTop="15dp"
+                            >
+
+                            <RelativeLayout
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:background="@drawable/purple_square"
+                                android:layout_centerVertical="true"
+                                android:id="@+id/arrow_icon">
+
+                                <ImageView
+                                    android:src="@drawable/arrow_icon"
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
+                                    android:layout_centerInParent="true" />
+
+                            </RelativeLayout>
+
+                            <RelativeLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toEndOf="@id/arrow_icon"
+                                android:layout_centerVertical="true"
+                                android:paddingStart="8dp"
+                                >
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="22sp"
+                                    android:id="@+id/completion_rate"
+                                    android:textStyle="bold"
+                                    >
+
+
+                                </TextView>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Completion"
+                                    android:textColor="#AFC4FF"
+                                    android:textSize="12sp"
+                                    android:layout_below="@id/completion_rate"
+                                    >
+
+                                </TextView>
+
+
+
+                            </RelativeLayout>
+
+
+                            <!--<TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="12"
+                                android:textColor="@android:color/white"
+                                android:textSize="20sp"
+                                android:layout_marginTop="6dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Active Tasks"
+                                android:textColor="#AFC4FF"
+                                android:textSize="13sp" />-->
+                        </RelativeLayout>
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+
+            <!-- CONTENT AREA -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@android:color/white"
+                android:padding="20dp">
+
+                <!-- Quick Actions title -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quick Actions"
+                    android:textSize="18sp"
+                    android:textColor="#001542"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="14dp" />
+
+                <!-- TEAMS -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:orientation="horizontal"
+                    android:padding="14dp"
+                    android:background="@drawable/action_card"
+                    android:layout_marginBottom="10dp">
+
+                    <RelativeLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/icon_square"
+                        android:layout_centerVertical="true">
+
+                        <ImageView
+                            android:src="@drawable/team_icon"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_centerInParent="true" />
+                    </RelativeLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Teams"
+                            android:textSize="13sp"
+                            android:textColor="#001542"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Manage team collaboration"
+                            android:textSize="13sp"
+                            android:textColor="#6E7D91" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- MY TASKS -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:orientation="horizontal"
+                    android:padding="14dp"
+                    android:background="@drawable/action_card"
+                    android:layout_marginBottom="10dp">
+
+                    <RelativeLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/icon_square"
+                        android:layout_centerVertical="true">
+
+                        <ImageView
+                            android:src="@drawable/tick_icon"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_centerInParent="true" />
+                    </RelativeLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="My Tasks"
+                            android:textSize="13sp"
+                            android:textColor="#001542"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="View assigned tasks"
+                            android:textSize="13sp"
+                            android:textColor="#6E7D91" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- NOTIFICATIONS -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:orientation="horizontal"
+                    android:padding="14dp"
+                    android:background="@drawable/action_card"
+                    android:layout_marginBottom="10dp">
+
+                    <RelativeLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/icon_square"
+                        android:layout_centerVertical="true">
+
+                        <ImageView
+                            android:src="@drawable/bell_icon"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_centerInParent="true" />
+                    </RelativeLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Notifications"
+                            android:textSize="13sp"
+                            android:textColor="#001542"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Check updates"
+                            android:textSize="13sp"
+                            android:textColor="#6E7D91" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- CHECK-IN BUTTON -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:background="@drawable/check_in_out_button">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Check In/Out"
+                        android:layout_centerInParent="true"
+                        android:textSize="12sp"
+                        android:textColor="@color/white"
+                        android:translationX="5dp"
+                        android:translationY="-1dp">
+
+                    </TextView>
+                </RelativeLayout>
+
+
+                <!-- RECENT ACTIVITY -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recent Activity"
+                    android:textSize="18sp"
+                    android:textColor="#001542"
+                    android:textStyle="bold"
+                    android:layout_marginTop="22dp"
+                    android:layout_marginBottom="10dp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:listitem="@layout/activity_cards"
+                    >
+
+                </androidx.recyclerview.widget.RecyclerView>
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <ImageView
+        android:id="@+id/floatingChat"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:src="@drawable/chat_icon"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="22dp"
+        android:layout_above="@id/bottomNav"/>
+
+
+    <RelativeLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:paddingHorizontal="30dp"
+        android:paddingTop="8dp"
+        android:background="@color/white"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="5"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Home -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/home_active"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Home"
+                    android:textColor="#2F80FF"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+            <!-- Teams -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/building"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Teams"
+                    android:textColor="#7A8FA6"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+            <!-- Tasks -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/task"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tasks"
+                    android:textColor="#7A8FA6"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+            <!-- Notifications -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/bell"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Notifications"
+                    android:textColor="#7A8FA6"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+            <!-- Profile -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/profile_icon"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Profile"
+                    android:textColor="#7A8FA6"
+                    android:textSize="11sp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+
+</RelativeLayout>
