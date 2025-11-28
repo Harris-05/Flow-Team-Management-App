@@ -12,7 +12,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 
-class Login : AppCompatActivity() {
+class login : AppCompatActivity() {
 
     private lateinit var emailInput: EditText
     private lateinit var passwordInput: EditText
@@ -79,7 +79,8 @@ class Login : AppCompatActivity() {
                         startActivity(Intent(this, home_page::class.java))
                         finish()
                     } else {
-                        Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } catch (e: Exception) {
                     Toast.makeText(this, "Invalid server response", Toast.LENGTH_SHORT).show()

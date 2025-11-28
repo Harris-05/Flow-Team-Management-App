@@ -31,8 +31,7 @@
             android:textColor="@color/dark_blue"
             android:layout_below="@id/logo_placeholder"
             android:layout_marginTop="24dp"
-            android:layout_centerHorizontal="true"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_centerHorizontal="true" />
 
         <!-- Subtitle -->
         <TextView
@@ -44,13 +43,12 @@
             android:textColor="@color/dark_blue"
             android:layout_below="@id/title"
             android:layout_marginTop="4dp"
-            android:layout_centerHorizontal="true"
-            android:fontFamily="@font/poppins_light"/>
+            android:layout_centerHorizontal="true" />
 
         <ImageView
             android:id="@+id/profileImage"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_below="@id/subtitle"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
@@ -70,8 +68,7 @@
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_below="@id/profileImage"
-            android:layout_marginTop="28dp"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_marginTop="28dp" />
 
         <!-- Full Name Input -->
         <EditText
@@ -84,8 +81,7 @@
             android:paddingHorizontal="16dp"
             android:textColor="#000000"
             android:textColorHint="#AAAAAA"
-            android:background="@drawable/bg_edittext"
-            android:fontFamily="@font/poppins_light"/>
+            android:background="@drawable/bg_edittext" />
 
         <!-- Email / Phone toggle container -->
 
@@ -100,8 +96,7 @@
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_below="@id/input_fullname"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_marginTop="20dp" />
 
         <!-- Email Input -->
         <EditText
@@ -115,8 +110,7 @@
             android:textColor="#000000"
             android:textColorHint="#AAAAAA"
             android:background="@drawable/bg_edittext"
-            android:inputType="textEmailAddress"
-            android:fontFamily="@font/poppins_light"/>
+            android:inputType="textEmailAddress" />
 
         <!-- Password Label -->
         <TextView
@@ -128,8 +122,7 @@
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_below="@id/input_email"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_marginTop="20dp" />
 
         <!-- Password Input -->
         <EditText
@@ -143,8 +136,7 @@
             android:textColor="#000000"
             android:textColorHint="#AAAAAA"
             android:background="@drawable/bg_edittext"
-            android:inputType="textPassword"
-            android:fontFamily="@font/poppins_light"/>
+            android:inputType="textPassword" />
 
         <!-- Confirm Password Label -->
         <TextView
@@ -156,8 +148,7 @@
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_below="@id/input_password"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_marginTop="20dp" />
 
         <!-- Confirm Password Input -->
         <EditText
@@ -171,8 +162,7 @@
             android:textColor="#000000"
             android:textColorHint="#AAAAAA"
             android:background="@drawable/bg_edittext"
-            android:inputType="textPassword"
-            android:fontFamily="@font/poppins_light"/>
+            android:inputType="textPassword" />
 
         <!-- Terms and Privacy -->
         <CheckBox
@@ -183,8 +173,7 @@
             android:textSize="13sp"
             android:textColor="#555555"
             android:layout_below="@id/input_confirm_password"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/poppins_light"/>
+            android:layout_marginTop="16dp" />
 
         <!-- Create Account Button -->
         <TextView
@@ -199,8 +188,7 @@
             android:textColor="@color/white"
             android:layout_below="@id/checkbox_terms"
             android:layout_marginTop="20dp"
-            android:background="@drawable/bg_button_primary"
-            android:fontFamily="@font/poppins_medium"/>
+            android:background="@drawable/bg_button_primary" />
 
         <!-- Already have account -->
         <RelativeLayout
@@ -217,8 +205,7 @@
                 android:textColor="#777777"
                 android:textSize="13sp"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/poppins_light"/>
+                android:layout_marginTop="20dp" />
 
             <TextView
                 android:id="@+id/signin_link"
@@ -229,8 +216,7 @@
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:layout_toRightOf="@id/signin_text"
-                android:layout_alignBaseline="@id/signin_text"
-                android:fontFamily="@font/poppins_medium"/>
+                android:layout_alignBaseline="@id/signin_text" />
         </RelativeLayout>
 
     </RelativeLayout>

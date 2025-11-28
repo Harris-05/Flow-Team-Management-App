@@ -53,7 +53,7 @@ class sign_up_page : AppCompatActivity() {
         }
 
         signinLink.setOnClickListener {
-            startActivity(Intent(this, Login::class.java))
+            startActivity(Intent(this, login::class.java))
         }
     }
 
@@ -121,7 +121,7 @@ class sign_up_page : AppCompatActivity() {
 
                 if (response.getBoolean("success")) {
                     Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, Login::class.java))
+                    startActivity(Intent(this, login::class.java))
                     finish()
                 } else {
                     Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT).show()
