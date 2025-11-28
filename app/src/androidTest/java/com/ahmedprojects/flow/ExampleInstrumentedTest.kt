@@ -1,4 +1,4 @@
-package com.ahmedprojects.flow_frontend_ahmed
+package com.ahmedprojects.flow
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

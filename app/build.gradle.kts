@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ahmedprojects.flow_frontend_ahmed"
+    namespace = "com.ahmedprojects.flow"
     compileSdk = 36
 
     defaultConfig {

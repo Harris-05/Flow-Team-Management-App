@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    android:id="@+id/main"
+    android:fitsSystemWindows="true">
 
-    <!-- Center Main Logo -->
     <ImageView
         android:id="@+id/ivFlowLogo"
         android:layout_width="280dp"
@@ -15,16 +16,5 @@
         android:contentDescription="Flow Logo"
         android:src="@drawable/logo" />
 
-    <!-- NovaByte Logo Bottom -->
-    <ImageView
-        android:id="@+id/ivNovaByte"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="40dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="NovaByte Logo"
-        android:src="@drawable/novabyte_logo" />
 
 </RelativeLayout>

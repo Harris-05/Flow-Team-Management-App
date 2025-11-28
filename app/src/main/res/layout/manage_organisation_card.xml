@@ -10,6 +10,7 @@
     android:id="@+id/main"
     android:fitsSystemWindows="true">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,7 +46,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="12dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:id="@+id/name_container">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -82,21 +84,44 @@
                 android:text="placeholder@techcorp.com"
                 android:textColor="#6B7280"
                 android:textSize="14sp" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/building"
+                    android:id="@+id/building"
+                    >
+                </ImageView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="team_name"
+                    android:textColor="#6B7280"
+                    android:layout_toRightOf="@id/building"
+                    android:layout_marginStart="4dp"
+                    android:textSize="12sp"
+                    >
+                </TextView>
+
+            </RelativeLayout>
+
+
         </LinearLayout>
+
+
 
         <!-- Email Icon -->
         <RelativeLayout
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/circle"
-            >
-            <ImageView
-                android:id="@+id/btn_email"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/email_icon"
-                android:contentDescription="Email"
-                android:layout_centerInParent="true"/>
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@drawable/right_arrow_24">
+
+
 
         </RelativeLayout>
 

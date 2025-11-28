@@ -6,7 +6,9 @@
     android:padding="14dp"
     android:layout_marginBottom="12dp"
     android:background="@drawable/announcment_card_bg"
-    android:elevation="2dp">
+    android:elevation="2dp"
+    android:id="@+id/main"
+    android:fitsSystemWindows="true">
 
     <!-- Row: Avatar + Title + Chips -->
     <RelativeLayout

@@ -4,7 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#F4F7FC">
+    android:background="#F4F7FC"
+    android:id="@+id/main"
+    android:fitsSystemWindows="true">
+
 
     <!-- Scroll Area -->
     <ScrollView
@@ -66,7 +69,8 @@
 
                 <TextView
                     android:id="@+id/tabAnnouncements"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
                     android:layout_height="wrap_content"
                     android:text="Announcements"
                     android:textSize="14sp"
@@ -74,15 +78,17 @@
                     />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="Your Tasks"
+                    android:text="Tasks"
                     android:textSize="14sp"
                     android:textColor="#8293B5"
                     android:layout_marginStart="22dp"/>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="All Tasks"
                     android:textSize="14sp"
@@ -90,7 +96,8 @@
                     android:layout_marginStart="22dp"/>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="People"
                     android:textSize="14sp"
@@ -98,6 +105,7 @@
                     android:layout_marginStart="22dp"/>
 
             </LinearLayout>
+
 
 
             <androidx.recyclerview.widget.RecyclerView

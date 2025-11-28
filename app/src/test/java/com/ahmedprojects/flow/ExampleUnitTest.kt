@@ -1,4 +1,4 @@
-package com.ahmedprojects.flow_frontend_ahmed
+package com.ahmedprojects.flow
 
 import org.junit.Test
 

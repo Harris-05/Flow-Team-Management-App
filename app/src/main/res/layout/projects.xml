@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#F4F7FC">
+    android:background="#F4F7FC"
+    android:id="@+id/main"
+    android:fitsSystemWindows="true">
 
     <!-- ========================================================= -->
     <!-- TOP SCROLLABLE CONTENT -->
@@ -32,7 +34,7 @@
                     android:id="@+id/pageTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Organizations"
+                    android:text="Projects"
                     android:textColor="@android:color/white"
                     android:textSize="20sp" />
 
@@ -105,7 +107,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Join New Organization"
+                            android:text="Join New Project"
                             android:textColor="#001542"
                             android:textSize="11sp"
                             android:layout_marginStart="8dp"/>
@@ -126,7 +128,7 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:hint="Enter organization join code"
+                            android:hint="Enter Project Join Code"
                             android:textSize="13sp"
                             android:textColor="#001542"
                             android:textColorHint="#8293B5"
@@ -144,7 +146,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Create New Organization"
+                            android:text="Create New Project"
                             android:textColor="@android:color/white"
                             android:textSize="14sp"
                             android:layout_centerInParent="true"
@@ -157,7 +159,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your Organizations"
+                    android:text="Your Projects"
                     android:textSize="17sp"
                     android:textColor="#001542"
                     />
@@ -239,7 +241,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Organisations"
+                    android:text="Projects"
                     android:textColor="#2F80FF"
                     android:textSize="11sp"/>
             </LinearLayout>

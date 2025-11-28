@@ -6,7 +6,9 @@
     android:orientation="horizontal"
     android:background="@drawable/org_card_bg"
     android:padding="16dp"
-    android:layout_marginVertical="8dp">
+    android:layout_marginVertical="8dp"
+    android:id="@+id/main"
+    android:fitsSystemWindows="true">
 
     <!-- Circle Logo / Initials -->
     <de.hdodenhof.circleimageview.CircleImageView

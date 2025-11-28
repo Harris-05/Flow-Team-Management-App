@@ -7,7 +7,9 @@
     android:layout_marginBottom="12dp"
     android:clipToPadding="false"
     android:elevation="2dp"
-    android:background="@drawable/announcment_card_bg">
+    android:background="@drawable/announcment_card_bg"
+    android:id="@+id/main"
+    android:fitsSystemWindows="true">
 
     <!-- Row: Avatar + Title + Menu -->
     <RelativeLayout
