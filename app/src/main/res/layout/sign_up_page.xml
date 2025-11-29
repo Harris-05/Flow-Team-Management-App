@@ -2,9 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:id="@+id/main"
-    android:fitsSystemWindows="true">
+    android:background="#FFFFFF">
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,8 +31,7 @@
             android:textColor="@color/dark_blue"
             android:layout_below="@id/logo_placeholder"
             android:layout_marginTop="24dp"
-            android:layout_centerHorizontal="true"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_centerHorizontal="true" />
 
         <!-- Subtitle -->
         <TextView
@@ -45,8 +43,18 @@
             android:textColor="@color/dark_blue"
             android:layout_below="@id/title"
             android:layout_marginTop="4dp"
+            android:layout_centerHorizontal="true" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profileImage"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_below="@id/subtitle"
             android:layout_centerHorizontal="true"
-            android:fontFamily="@font/poppins_light"/>
+            android:layout_marginTop="20dp"
+            android:background="@drawable/circle_bg"
+            android:src="@drawable/baseline_person_24"
+            android:contentDescription="Profile Image" />
 
         <!-- Full Name Label -->
         <TextView
@@ -57,10 +65,8 @@
             android:textColor="@color/dark_blue"
             android:textStyle="bold"
             android:textSize="14sp"
-            android:layout_below="@id/subtitle"
-            android:layout_marginTop="28dp"
-            android:fontFamily="@font/poppins_medium"
-            />
+            android:layout_below="@id/profileImage"
+            android:layout_marginTop="28dp" />
 
         <!-- Full Name Input -->
         <EditText
@@ -88,8 +94,7 @@
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_below="@id/input_fullname"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_marginTop="20dp" />
 
         <!-- Email Input -->
         <EditText
@@ -115,8 +120,7 @@
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_below="@id/input_email"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_marginTop="20dp" />
 
         <!-- Password Input -->
         <EditText
@@ -142,8 +146,7 @@
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_below="@id/input_password"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/poppins_medium"/>
+            android:layout_marginTop="20dp" />
 
         <!-- Confirm Password Input -->
         <EditText
@@ -168,8 +171,7 @@
             android:textSize="13sp"
             android:textColor="#555555"
             android:layout_below="@id/input_confirm_password"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/poppins_light"/>
+            android:layout_marginTop="16dp" />
 
         <!-- Create Account Button -->
         <TextView
@@ -184,34 +186,36 @@
             android:textColor="@color/white"
             android:layout_below="@id/checkbox_terms"
             android:layout_marginTop="20dp"
-            android:background="@drawable/bg_button_primary"
-            android:fontFamily="@font/poppins_light"/>
+            android:background="@drawable/bg_button_primary" />
 
         <!-- Already have account -->
-        <TextView
-            android:id="@+id/signin_text"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Already have an account? "
-            android:textColor="#777777"
-            android:textSize="13sp"
-            android:layout_below="@id/btn_create_account"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/poppins_light"
-            />
+            android:layout_marginEnd="30dp"
+            android:layout_below="@id/btn_create_account">
+            <!-- Already have account -->
+            <TextView
+                android:id="@+id/signin_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Don't have an account? "
+                android:textColor="#777777"
+                android:textSize="13sp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp" />
 
-        <TextView
-            android:id="@+id/signin_link"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign In"
-            android:textColor="#0B1D45"
-            android:textStyle="bold"
-            android:textSize="13sp"
-            android:layout_toRightOf="@id/signin_text"
-            android:layout_alignBaseline="@id/signin_text"
-            android:fontFamily="@font/poppins_medium"/>
+            <TextView
+                android:id="@+id/signin_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign in"
+                android:textColor="#0B1D45"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:layout_toRightOf="@id/signin_text"
+                android:layout_alignBaseline="@id/signin_text" />
+        </RelativeLayout>
 
     </RelativeLayout>
 </ScrollView>

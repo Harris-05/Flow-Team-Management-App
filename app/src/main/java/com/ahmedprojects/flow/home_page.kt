@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import de.hdodenhof.circleimageview.CircleImageView
 
 class home_page : AppCompatActivity() {
 
@@ -24,6 +25,13 @@ class home_page : AppCompatActivity() {
             insets
         }
 
+        val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
+        val userId = prefs.getInt("id", -1)
+        val userName = prefs.getString("name", "Guest")
+
+        // Just to confirm it's working, show a toast (optional)
+        Toast.makeText(this, "Logged in as: $userName (ID: $userId)", Toast.LENGTH_SHORT).show()
+
         var pro = findViewById<ImageView>(R.id.ivNotificationButton)
         pro.setOnClickListener {
             Toast.makeText(this, ip.IP, Toast.LENGTH_SHORT).show()
@@ -33,7 +41,11 @@ class home_page : AppCompatActivity() {
         var tasksBtn = findViewById<LinearLayout>(R.id.Tasks)
         var notificationsBtn = findViewById<LinearLayout>(R.id.Notifications)
         var profileBtn = findViewById<LinearLayout>(R.id.Profile)
-        
+        var profilePic = findViewById<CircleImageView>(R.id.ivProfile)
+
+        loadUserProfilePhoto(userId, profilePic)
+
+
         projectsBtn.setOnClickListener {
             val intent = Intent(this, projects::class.java)
             startActivity(intent)
@@ -52,7 +64,55 @@ class home_page : AppCompatActivity() {
         }*/
 
 
-
-
     }
+
+    private fun loadUserProfilePhoto(userId: Int, profilePic: CircleImageView) {
+        if (userId == -1) {
+            Toast.makeText(this, "Invalid User ID", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val queue = com.android.volley.toolbox.Volley.newRequestQueue(this)
+        val url = IP_String().IP + "get_profile_pic.php"
+
+        val jsonBody = org.json.JSONObject()
+        jsonBody.put("userId", userId)
+
+        val request = com.android.volley.toolbox.JsonObjectRequest(
+            com.android.volley.Request.Method.POST,
+            url,
+            jsonBody,
+            { response ->
+                try {
+                    if (response.getBoolean("success")) {
+
+                        val base64Image = response.getString("profile_photo")
+
+                        if (!base64Image.isNullOrEmpty()) {
+                            try {
+                                val decodedBytes = android.util.Base64.decode(base64Image, android.util.Base64.DEFAULT)
+                                val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+
+                                profilePic.setImageBitmap(bitmap)
+
+                            } catch (e: Exception) {
+                                Toast.makeText(this, "Error decoding image", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                    } else {
+                        Toast.makeText(this, "Could not retrieve profile photo", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Invalid response", Toast.LENGTH_SHORT).show()
+                }
+            },
+            { error ->
+                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        )
+
+        queue.add(request)
+    }
+
 }
