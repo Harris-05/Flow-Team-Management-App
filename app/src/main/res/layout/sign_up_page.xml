@@ -45,7 +45,7 @@
             android:layout_marginTop="4dp"
             android:layout_centerHorizontal="true" />
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profileImage"
             android:layout_width="100dp"
             android:layout_height="100dp"
@@ -53,9 +53,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:background="@drawable/circle_bg"
-            android:src="@android:drawable/ic_menu_camera"
-            android:scaleType="centerInside"
-            android:padding="20dp"
+            android:src="@drawable/baseline_person_24"
             android:contentDescription="Profile Image" />
 
         <!-- Full Name Label -->

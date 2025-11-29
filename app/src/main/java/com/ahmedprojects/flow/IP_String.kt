@@ -1,5 +1,12 @@
 package com.ahmedprojects.flow
 
 class IP_String(
-    val IP : String = "http://192.168.100.18/Flow/"
+    //Harris:
+    // val IP : String = "http://192.168.100.18/Flow/"
+
+    //Ashher:
+    //val IP : String = "http://192.168.100.18/Flow/"
+
+    //Ahmed:
+    val IP : String = "http://192.168.1.4/Flow/"
 )
