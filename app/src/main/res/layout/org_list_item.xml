@@ -95,29 +95,6 @@
                 android:textSize="12sp"
                 android:layout_marginStart="4dp" />
 
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/end"
-                app:tint="#606F89"
-                android:layout_marginStart="16dp" />
-
-            <TextView
-                android:id="@+id/orgTeams"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="#7E899F"
-                android:textSize="13sp"
-                android:layout_marginStart="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="teams"
-                android:textColor="#7E899F"
-                android:textSize="12sp"
-                android:layout_marginStart="4dp" />
         </LinearLayout>
     </LinearLayout>
 
