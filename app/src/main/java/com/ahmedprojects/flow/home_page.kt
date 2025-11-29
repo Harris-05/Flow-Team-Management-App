@@ -4,12 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import de.hdodenhof.circleimageview.CircleImageView
+import org.w3c.dom.Text
 
 class home_page : AppCompatActivity() {
 
@@ -42,8 +44,10 @@ class home_page : AppCompatActivity() {
         var notificationsBtn = findViewById<LinearLayout>(R.id.Notifications)
         var profileBtn = findViewById<LinearLayout>(R.id.Profile)
         var profilePic = findViewById<CircleImageView>(R.id.ivProfile)
+        var greetingsName = findViewById<TextView>(R.id.tvHello)
 
         loadUserProfilePhoto(userId, profilePic)
+        loadUserName(userId, greetingsName)
 
 
         projectsBtn.setOnClickListener {
@@ -114,5 +118,48 @@ class home_page : AppCompatActivity() {
 
         queue.add(request)
     }
+
+    private fun loadUserName(userId: Int, greetings: TextView) {
+        if (userId == -1) {
+            Toast.makeText(this, "Invalid User ID", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val queue = com.android.volley.toolbox.Volley.newRequestQueue(this)
+        val url = IP_String().IP + "get_profile_name.php"
+
+        val jsonBody = org.json.JSONObject()
+        jsonBody.put("userId", userId)
+
+        val request = com.android.volley.toolbox.JsonObjectRequest(
+            com.android.volley.Request.Method.POST,
+            url,
+            jsonBody,
+            { response ->
+                try {
+                    if (response.getBoolean("success")) {
+
+                        val profileName = response.getString("name")
+
+                        if (!profileName.isNullOrEmpty()) {
+                            greetings.text = "Hello, $profileName"
+                        } else {
+                            Toast.makeText(this, "Name is empty!", Toast.LENGTH_SHORT).show()
+                        }
+
+                    } else {
+                        Toast.makeText(this, "Could not retrieve profile name", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Invalid response", Toast.LENGTH_SHORT).show()
+                }
+            },
+            { error ->
+                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        )
+        queue.add(request)
+    }
+
 
 }

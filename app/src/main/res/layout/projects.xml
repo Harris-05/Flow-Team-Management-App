@@ -26,7 +26,7 @@
             <!-- TOP BLUE HEADER -->
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="130dp"
+                android:layout_height="140dp"
                 android:background="@drawable/home_page_top_section"
                 android:padding="20dp">
 
