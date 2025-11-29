@@ -14,6 +14,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Flow_Frontend_Ahmed">
         <activity
+            android:name=".chat_page"
+            android:exported="false" />
+        <activity
+            android:name=".add_chats_page"
+            android:exported="false" />
+        <activity
+            android:name=".all_chats_page"
+            android:exported="false" />
+
+        <activity
             android:name=".project_members_page"
             android:exported="false" />
         <activity

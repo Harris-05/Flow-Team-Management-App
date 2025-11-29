@@ -45,6 +45,8 @@ class home_page : AppCompatActivity() {
         var profileBtn = findViewById<LinearLayout>(R.id.Profile)
         var profilePic = findViewById<CircleImageView>(R.id.ivProfile)
         var greetingsName = findViewById<TextView>(R.id.tvHello)
+        var chatbtn = findViewById<ImageView>(R.id.floatingChat)
+
 
         loadUserProfilePhoto(userId, profilePic)
         loadUserName(userId, greetingsName)
@@ -56,6 +58,10 @@ class home_page : AppCompatActivity() {
         }
         tasksBtn.setOnClickListener {
             val intent = Intent(this, tasks_page::class.java)
+            startActivity(intent)
+        }
+        chatbtn.setOnClickListener {
+            val intent = Intent(this, all_chats_page::class.java)
             startActivity(intent)
         }
         /*notificationsBtn.setOnClickListener {
