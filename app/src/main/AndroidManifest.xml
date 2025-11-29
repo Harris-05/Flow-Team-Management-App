@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
+        android:usesCleartextTraffic="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/flow_icon"
         android:label="@string/app_name"
         android:roundIcon="@drawable/flow_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Flow_Frontend_Ahmed"
-        android:usesCleartextTraffic="true">
+        android:theme="@style/Theme.Flow_Frontend_Ahmed">
         <activity
             android:name=".create_project_page"
+            android:exported="false" />
+        <activity
+            android:name=".tasks_you_page"
+            android:exported="false" />
+        <activity
+            android:name=".create_task"
+            android:exported="false" />
+        <activity
+            android:name=".Task_Details"
             android:exported="false" />
         <activity
             android:name=".sign_up_page"

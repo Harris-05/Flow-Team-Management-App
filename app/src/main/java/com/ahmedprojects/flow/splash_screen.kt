@@ -22,7 +22,7 @@ class splash_screen : AppCompatActivity() {
 
         // Wait 3 seconds then navigate to login page
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, sign_up_page::class.java)
+            val intent = Intent(this, login::class.java)
             startActivity(intent)
             finish()
         }, 3000)
