@@ -40,11 +40,13 @@
 
             </RelativeLayout>
 
+            <!-- Tabs -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:orientation="horizontal"
                 android:padding="12dp">
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -53,12 +55,10 @@
                     android:id="@+id/tabForYou"
                     android:text="Tasks for you"
                     android:gravity="center"
-                    android:textColor="#1e90ff"
+                    android:textColor="#8293B5"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"/>
 
-
-                </TextView>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -67,20 +67,21 @@
                     android:id="@+id/tabByYou"
                     android:text="Tasks by you"
                     android:gravity="center"
-                    android:textColor="#8293B5">
-
-
-                </TextView>
+                    android:textColor="#1e90ff"
+                    android:clickable="true"
+                    android:focusable="true"/>
 
             </LinearLayout>
 
 
+
+            <!-- Task Filter Tabs (All / Pending / In Progress etc.) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingTop="18dp"
-                >
+                android:paddingTop="18dp">
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -92,9 +93,8 @@
                     android:gravity="center"
                     android:layout_marginHorizontal="6dp"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"/>
 
-                </TextView>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -105,9 +105,8 @@
                     android:gravity="center"
                     android:layout_marginHorizontal="6dp"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"/>
 
-                </TextView>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -118,46 +117,34 @@
                     android:gravity="center"
                     android:layout_marginHorizontal="6dp"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"/>
 
-                </TextView>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/oblong_white"
-                    android:text="Pending"
+                    android:text="Completed"
                     android:textSize="12sp"
                     android:gravity="center"
                     android:layout_marginHorizontal="6dp"
                     android:clickable="true"
-                    android:focusable="true"
-                    >
-
-                </TextView>
-
+                    android:focusable="true"/>
             </LinearLayout>
+
+            <!-- RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewTasks"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/recyclerViewTasks"
-                tools:listitem="@layout/tasks_page_card"
-                android:layout_marginTop="18dp">
-
-            </androidx.recyclerview.widget.RecyclerView>
-
+                android:layout_marginTop="18dp"
+                tools:listitem="@layout/tasks_page_card"/>
         </LinearLayout>
-
-
     </ScrollView>
-
-
-
 
     <!-- ========================================================= -->
     <!-- FIXED BOTTOM NAVIGATION BAR -->
     <!-- ========================================================= -->
-
     <RelativeLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
@@ -165,8 +152,7 @@
         android:layout_alignParentBottom="true"
         android:paddingHorizontal="30dp"
         android:paddingTop="8dp"
-        android:background="@color/white"
-        >
+        android:background="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -182,12 +168,10 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/home"/>
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -203,13 +187,10 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/building"
-                    />
-
+                    android:src="@drawable/building"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -225,13 +206,10 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/task_active"
-                    />
-
+                    android:src="@drawable/task_active"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -247,13 +225,10 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/bell"
-                    />
-
+                    android:src="@drawable/bell"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -269,12 +244,10 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center">
-
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/profile_icon"/>
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -282,10 +255,10 @@
                     android:textColor="#7A8FA6"
                     android:textSize="11sp"/>
             </LinearLayout>
-
         </LinearLayout>
     </RelativeLayout>
-    <!-- Add this inside the root RelativeLayout, after your bottomNav -->
+
+    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCreateTask"
         android:layout_width="wrap_content"
@@ -297,7 +270,5 @@
         android:src="@drawable/dot"
         android:contentDescription="Create Task"
         app:backgroundTint="@color/blue"
-        app:tint="@android:color/white">
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
-
+        app:tint="@android:color/white"/>
 </RelativeLayout>

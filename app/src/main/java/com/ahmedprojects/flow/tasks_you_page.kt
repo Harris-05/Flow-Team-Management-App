@@ -2,6 +2,7 @@ package com.ahmedprojects.flow
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -16,32 +17,33 @@ import com.android.volley.toolbox.Volley
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 
-class tasks_page : AppCompatActivity() {
+class tasks_you_page : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TaskAdapter
 
-    private val tasksForYou = mutableListOf<TaskModel>()
     private val tasksByYou = mutableListOf<TaskModel>()
 
-    var userId=-1
+    private var userId = -1
     private var IP = IP_String().IP
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.tasks_page)
+        setContentView(R.layout.tasks_you_page)
+
         val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
-        val CuserId = prefs.getInt("id", -1)
-        userId=CuserId
+        userId = prefs.getInt("id", -1)
+
         // Handle system bars
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val createtask = findViewById<FloatingActionButton>(R.id.fabCreateTask)
-        createtask.setOnClickListener {
+
+        val fabCreateTask = findViewById<FloatingActionButton>(R.id.fabCreateTask)
+        fabCreateTask.setOnClickListener {
             startActivity(Intent(this, create_task::class.java))
         }
 
@@ -49,32 +51,28 @@ class tasks_page : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = TaskAdapter(mutableListOf())
         recyclerView.adapter = adapter
-
         setupTabs()
+
         fetchTasks()
     }
-
     private fun setupTabs() {
         val tabForYou: TextView = findViewById(R.id.tabForYou)
         val tabByYou: TextView = findViewById(R.id.tabByYou)
 
+        // Click "Tasks for You" → go back to tasks_page
         tabForYou.setOnClickListener {
-            // Stay on current page and show tasks for you
-            adapter.updateTasks(tasksForYou)
-            tabForYou.setTextColor(resources.getColor(R.color.blue)) // highlight
-            tabByYou.setTextColor(resources.getColor(R.color.gray))  // reset other tab
+            val intent = Intent(this, tasks_page::class.java)
+            startActivity(intent)
+            finish() // optional, close this page
         }
 
-        tabByYou.setOnClickListener {
-            // Open new activity for tasks by you
-            val intent = Intent(this, tasks_you_page::class.java)
-            startActivity(intent)
-        }
+        // Highlight "Tasks by You" tab
+        tabByYou.setTextColor(resources.getColor(R.color.blue))
+        tabForYou.setTextColor(resources.getColor(R.color.gray))
     }
 
-
     private fun fetchTasks() {
-        val url = "$IP/get_user_tasks.php?user_id=$userId"
+        val url = "$IP/get_tasks_by_you.php?user_id=$userId" // <-- Different API
         val queue = Volley.newRequestQueue(this)
 
         val request = JsonObjectRequest(Request.Method.GET, url, null,
@@ -85,6 +83,7 @@ class tasks_page : AppCompatActivity() {
                     "Failed to fetch tasks: ${error.message}",
                     Toast.LENGTH_SHORT
                 ).show()
+                Log.e("API_FETCH_TASKS", "Failed to fetch tasks: ${error.message}")
             }
         )
 
@@ -97,7 +96,6 @@ class tasks_page : AppCompatActivity() {
             return
         }
 
-        tasksForYou.clear()
         tasksByYou.clear()
 
         val tasksArray = response.getJSONArray("tasks")
@@ -113,13 +111,9 @@ class tasks_page : AppCompatActivity() {
                 organisationName = obj.getString("project_name"),
                 updateRequested = obj.optInt("update_requested", 0) == 1
             )
-
-            // Filter tasks
-            if (obj.getInt("assigned_to") == userId) tasksForYou.add(task)
-            if (obj.getInt("assigned_by") == userId) tasksByYou.add(task)
+            tasksByYou.add(task)
         }
 
-        // Show "Tasks for you" by default
-        adapter.updateTasks(tasksForYou)
+        adapter.updateTasks(tasksByYou)
     }
 }
