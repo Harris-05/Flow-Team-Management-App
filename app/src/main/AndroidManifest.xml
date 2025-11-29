@@ -15,6 +15,12 @@
         android:theme="@style/Theme.Flow_Frontend_Ahmed"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".project_members_page"
+            android:exported="false" />
+        <activity
+            android:name=".manage_project_page"
+            android:exported="false" />
+        <activity
             android:name=".create_project_page"
             android:exported="false" />
         <activity

@@ -7,8 +7,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hdodenhof.circleimageview.CircleImageView
 
-class ProjectAdapter(private val projectList: List<Project>) :
-    RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
+class ProjectAdapter(
+    private val projectList: List<Project>,
+    private val onProjectClick: (Project) -> Unit   // <--- NEW PARAMETER
+) : RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
 
     class ProjectViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val orgLogo: CircleImageView = view.findViewById(R.id.orgLogo)
@@ -30,6 +32,11 @@ class ProjectAdapter(private val projectList: List<Project>) :
         holder.orgRoleBadge.text = project.role.capitalize()
         holder.orgDescription.text = project.description
         holder.orgMembers.text = project.membersCount.toString()
+
+        // CLICK EVENT
+        holder.itemView.setOnClickListener {
+            onProjectClick(project)
+        }
     }
 
     override fun getItemCount(): Int = projectList.size

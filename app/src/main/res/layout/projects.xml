@@ -125,7 +125,7 @@
                             android:textSize="13sp"
                             android:textColor="#001542"
                             android:textColorHint="#8293B5"
-                            android:background="@android:color/transparent"
+                            android:background="@drawable/bg_edittext"
                             android:paddingStart="12dp"/>
 
                         <LinearLayout
@@ -133,7 +133,8 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:background="@drawable/join_button"
-                            android:gravity="center">
+                            android:gravity="center"
+                            android:layout_marginStart="8dp">
 
                             <ImageView
                                 android:layout_width="wrap_content"

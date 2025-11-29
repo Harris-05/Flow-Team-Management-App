@@ -19,8 +19,8 @@ class projects : AppCompatActivity() {
 
     private var ip: IP_String = IP_String()
     private lateinit var etJoinCode: EditText
-    private lateinit var joinBtn: RelativeLayout
-    private lateinit var createBtn: RelativeLayout
+    private lateinit var joinBtn: LinearLayout
+    private lateinit var createBtn: LinearLayout
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ProjectAdapter
     private val projectList = ArrayList<Project>()
@@ -54,9 +54,15 @@ class projects : AppCompatActivity() {
         // etc.
         // then simply use findViewById(R.id.homeBtn)
 
-        adapter = ProjectAdapter(projectList)
+        adapter = ProjectAdapter(projectList) { clickedProject ->
+            val intent = Intent(this, manage_project_page::class.java)
+            intent.putExtra("project_id", clickedProject.id)
+            startActivity(intent)
+        }
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+
 
         // --- Load user's projects ---
         val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
