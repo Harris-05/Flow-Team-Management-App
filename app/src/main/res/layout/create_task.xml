@@ -23,16 +23,13 @@
 
         <!-- Project Selector -->
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select Project *"
-            android:textSize="14sp"
-            android:textColor="#1A1A2E"/>
-        <Spinner
-            android:id="@+id/spinnerProject"
+            android:id="@+id/tvProjectName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"/>
+            android:textSize="20sp"
+            android:padding="10dp"
+            android:text="Project Name" />
+
 
         <!-- Assign To Selector -->
         <TextView

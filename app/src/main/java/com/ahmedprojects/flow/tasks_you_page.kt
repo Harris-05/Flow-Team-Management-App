@@ -42,10 +42,7 @@ class tasks_you_page : AppCompatActivity() {
             insets
         }
 
-        val fabCreateTask = findViewById<FloatingActionButton>(R.id.fabCreateTask)
-        fabCreateTask.setOnClickListener {
-            startActivity(Intent(this, create_task::class.java))
-        }
+
 
         recyclerView = findViewById(R.id.recyclerViewTasks)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -109,8 +106,12 @@ class tasks_you_page : AppCompatActivity() {
                 status = obj.getString("status"),
                 assignedBy = obj.getInt("assigned_by"),
                 organisationName = obj.getString("project_name"),
-                updateRequested = obj.optInt("update_requested", 0) == 1
+                updateRequested = obj.optInt("update_requested", 0) == 1,
+
+                percentageCompleted = obj.optInt("completion", 0),  // NEW
+                dueDate = obj.optString("deadline", "N/A")                    // NEW
             )
+
             tasksByYou.add(task)
         }
 

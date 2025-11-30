@@ -40,10 +40,6 @@ class tasks_page : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val createtask = findViewById<FloatingActionButton>(R.id.fabCreateTask)
-        createtask.setOnClickListener {
-            startActivity(Intent(this, create_task::class.java))
-        }
 
         recyclerView = findViewById(R.id.recyclerViewTasks)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -111,8 +107,12 @@ class tasks_page : AppCompatActivity() {
                 status = obj.getString("status"),
                 assignedBy = obj.getInt("assigned_by"),
                 organisationName = obj.getString("project_name"),
-                updateRequested = obj.optInt("update_requested", 0) == 1
+                updateRequested = obj.optInt("update_requested", 0) == 1,
+
+                percentageCompleted = obj.optInt("completion", 0),  // NEW
+                dueDate = obj.optString("deadline", "N/A")                    // NEW
             )
+
 
             // Filter tasks
             if (obj.getInt("assigned_to") == userId) tasksForYou.add(task)

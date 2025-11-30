@@ -153,6 +153,7 @@ class projects : AppCompatActivity() {
             },
             { error ->
                 Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
+                Log.e("PROJECTS_ERROR", error.toString())
             })
 
         queue.add(request)
@@ -182,6 +183,7 @@ class projects : AppCompatActivity() {
             },
             { error ->
                 Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
+                Log.e("JOIN_PROJECT_ERROR", error.toString())
             })
         queue.add(request)
     }

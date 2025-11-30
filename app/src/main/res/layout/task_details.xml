@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7FC"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#F4F7FC">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Task Title -->
+        <!-- Title -->
         <TextView
             android:id="@+id/tvTaskTitle"
             android:layout_width="match_parent"
@@ -21,9 +20,9 @@
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="#1A1A2E"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp" />
 
-        <!-- Status and Priority -->
+        <!-- Status + Priority Chips -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,7 +38,7 @@
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
                 android:background="@drawable/chip_blue"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="8dp" />
 
             <TextView
                 android:id="@+id/tvPriority"
@@ -50,7 +49,7 @@
                 android:textColor="#FFFFFF"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
-                android:background="@drawable/chip_red"/>
+                android:background="@drawable/chip_red" />
         </LinearLayout>
 
         <!-- Description -->
@@ -62,23 +61,39 @@
             android:textSize="16sp"
             android:textColor="#5D6D7E"
             android:layout_marginTop="16dp"
-            android:lineSpacingExtra="4dp"/>
+            android:lineSpacingExtra="4dp" />
 
         <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#E0E0E0"
-            android:layout_marginVertical="16dp"/>
+            android:layout_marginVertical="16dp" />
+
+        <!-- Assigned By -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Assigned By:"
+            android:textStyle="bold"
+            android:textColor="#7F8C8D" />
+
+        <TextView
+            android:id="@+id/tvAssignedBy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Manager Name"
+            android:textSize="16sp"
+            android:textColor="#1A1A2E"
+            android:layout_marginBottom="12dp" />
 
         <!-- Assigned To -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Assigned To:"
-            android:textSize="14sp"
-            android:textColor="#7F8C8D"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="#7F8C8D" />
 
         <TextView
             android:id="@+id/tvAssignedTo"
@@ -87,34 +102,15 @@
             android:text="User Name"
             android:textSize="16sp"
             android:textColor="#1A1A2E"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="16dp" />
 
-        <!-- Team / Organization -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Team / Organization:"
-            android:textSize="14sp"
-            android:textColor="#7F8C8D"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/tvTeamOrg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="UI/UX Team / Flow Inc."
-            android:textSize="16sp"
-            android:textColor="#1A1A2E"
-            android:layout_marginBottom="12dp"/>
-
-        <!-- Deadline -->
+        <!-- DEADLINE -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Deadline:"
-            android:textSize="14sp"
-            android:textColor="#7F8C8D"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="#7F8C8D" />
 
         <TextView
             android:id="@+id/tvDeadline"
@@ -123,42 +119,103 @@
             android:text="2025-12-05"
             android:textSize="16sp"
             android:textColor="#1A1A2E"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="20dp" />
 
-        <!-- Optional Update Requested -->
-        <TextView
-            android:id="@+id/tvUpdateRequested"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Update Requested"
-            android:textSize="14sp"
-            android:textColor="#E67E22"
-            android:visibility="gone"
-            android:layout_marginBottom="20dp"/>
-
-        <!-- Optional Action Buttons -->
-        <LinearLayout
+        <!-- MANAGER ONLY: Request Update Button -->
+        <Button
+            android:id="@+id/btnRequestUpdate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:text="Request Update"
+            android:backgroundTint="#F39C12"
+            android:textColor="#FFFFFF"
+            android:visibility="gone"
+            android:layout_marginBottom="20dp" />
 
-            <Button
-                android:id="@+id/btnMarkComplete"
+        <!-- MEMBER ONLY: Upload Update Section -->
+        <LinearLayout
+            android:id="@+id/memberUpdateSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mark Completed"
+                android:text="Upload Progress Image:"
+                android:textStyle="bold"
+                android:textColor="#7F8C8D" />
+
+            <ImageView
+                android:id="@+id/imgPreview"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="centerCrop"
+                android:background="#DCDCDC" />
+
+            <Button
+                android:id="@+id/btnChooseImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Choose Image"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#3498DB"
+                android:textColor="#fff" />
+
+            <EditText
+                android:id="@+id/etUpdateMessage"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:hint="Write your update..."
+                android:gravity="top"
+                android:background="@drawable/bg_edittext"
+                android:padding="10dp"
+                android:layout_marginTop="12dp" />
+
+            <Button
+                android:id="@+id/btnSubmitUpdate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Submit Update"
                 android:backgroundTint="#2ECC71"
                 android:textColor="#FFFFFF"
-                android:layout_marginEnd="12dp"/>
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
 
-            <Button
-                android:id="@+id/btnEditTask"
+        <!-- MANAGER ONLY: View Submitted Update -->
+        <LinearLayout
+            android:id="@+id/managerViewUpdateSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="20dp">
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Edit Task"
-                android:backgroundTint="#3498DB"
-                android:textColor="#FFFFFF"/>
+                android:text="Latest Update:"
+                android:textStyle="bold"
+                android:textColor="#7F8C8D" />
+
+            <ImageView
+                android:id="@+id/imgSubmittedUpdate"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="centerCrop"
+                android:background="#DCDCDC" />
+
+            <TextView
+                android:id="@+id/tvSubmittedMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No updates yet..."
+                android:textSize="15sp"
+                android:textColor="#1A1A2E"
+                android:layout_marginTop="10dp" />
         </LinearLayout>
 
     </LinearLayout>

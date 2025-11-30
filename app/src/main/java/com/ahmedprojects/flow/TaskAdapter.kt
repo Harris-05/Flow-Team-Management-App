@@ -22,6 +22,9 @@ class TaskAdapter(
         val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
         val tvUpdateRequested: TextView = itemView.findViewById(R.id.tvUpdateRequested)
         val tvTeamName: TextView = itemView.findViewById(R.id.TeamName)
+        val tvDueDate: TextView = itemView.findViewById(R.id.tvDueDate)
+
+        val tvPercentage: TextView = itemView.findViewById(R.id.tvPercentCompleted)
         val tvOrganisationName: TextView = itemView.findViewById(R.id.OrganisationName)
         val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
     }
@@ -41,6 +44,8 @@ class TaskAdapter(
         holder.tvStatus.text = task.status
         holder.tvOrganisationName.text = task.organisationName
         holder.tvDescription.text = task.description
+        holder.tvPercentage.text = "${task.percentageCompleted}% Completed"
+        holder.tvDueDate.text = "Due: ${task.dueDate}"
 
         holder.tvUpdateRequested.visibility =
             if (task.updateRequested) View.VISIBLE else View.GONE

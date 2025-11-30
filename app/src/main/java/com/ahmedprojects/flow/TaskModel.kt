@@ -8,6 +8,9 @@ data class TaskModel(
     val status: String,
     val assignedBy: Int,
     val organisationName: String,
-    val updateRequested: Boolean = false
+    val updateRequested: Boolean,
+    val percentageCompleted: Int,   // NEW
+    val dueDate: String             // NEW
 )
+
 
