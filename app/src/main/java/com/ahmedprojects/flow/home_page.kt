@@ -132,7 +132,7 @@ class home_page : AppCompatActivity() {
         }
 
         val queue = com.android.volley.toolbox.Volley.newRequestQueue(this)
-        val url = IP_String().IP + "get_profile_name.php"
+        val url = IP_String().IP + "get_profile_username.php"
 
         val jsonBody = org.json.JSONObject()
         jsonBody.put("userId", userId)

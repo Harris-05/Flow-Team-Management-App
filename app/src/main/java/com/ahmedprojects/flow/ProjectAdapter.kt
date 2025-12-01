@@ -1,5 +1,7 @@
 package com.ahmedprojects.flow
 
+import android.graphics.BitmapFactory
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +11,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 
 class ProjectAdapter(
     private val projectList: List<Project>,
-    private val onProjectClick: (Project) -> Unit   // <--- NEW PARAMETER
+    private val onProjectClick: (Project) -> Unit
 ) : RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
 
     class ProjectViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -28,10 +30,26 @@ class ProjectAdapter(
 
     override fun onBindViewHolder(holder: ProjectViewHolder, position: Int) {
         val project = projectList[position]
+
         holder.orgName.text = project.name
         holder.orgRoleBadge.text = project.role.capitalize()
         holder.orgDescription.text = project.description
         holder.orgMembers.text = project.membersCount.toString()
+
+        // Decode and display project image if available
+        if (!project.pictureUrl.isNullOrEmpty()) {
+            try {
+                val decodedBytes = Base64.decode(project.pictureUrl, Base64.NO_WRAP)
+                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                holder.orgLogo.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                // fallback image if decoding fails
+                holder.orgLogo.setImageResource(R.drawable.org_logo_placeholder)
+            }
+        } else {
+            // default placeholder
+            holder.orgLogo.setImageResource(R.drawable.org_logo_placeholder)
+        }
 
         // CLICK EVENT
         holder.itemView.setOnClickListener {

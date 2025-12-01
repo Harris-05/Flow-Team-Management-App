@@ -1,7 +1,9 @@
 package com.ahmedprojects.flow
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -13,6 +15,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import de.hdodenhof.circleimageview.CircleImageView
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -26,6 +29,8 @@ class manage_project_page : AppCompatActivity() {
     private lateinit var rvTasks: RecyclerView
     private lateinit var btnMembers: RelativeLayout
     private lateinit var fabCreateTask: FloatingActionButton
+
+    private lateinit var projectPfp: CircleImageView
 
     private var ip = IP_String().IP
 
@@ -42,6 +47,7 @@ class manage_project_page : AppCompatActivity() {
         rvTasks = findViewById(R.id.rvTasks)
         btnMembers = findViewById(R.id.btnMembers)
         fabCreateTask = findViewById(R.id.fabCreateTask)
+        projectPfp = findViewById(R.id.projectPfp)
 
         rvTasks.layoutManager = LinearLayoutManager(this)
 
@@ -101,18 +107,40 @@ class manage_project_page : AppCompatActivity() {
                     tvProjectTitle.text = name
                     tvDescription.text = description
                     tvOwner.text = ownerName
-
                     tvJoinCode.text = if (currentUserId == ownerId) joinCode else "******"
+
+                    // --- NEW: load project picture ---
+                    if (response.has("picture_base64") && !response.isNull("picture_base64")) {
+                        val base64String = response.getString("picture_base64")
+                        if (base64String.isNotEmpty()) {
+                            try {
+                                val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
+                                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                                projectPfp.setImageBitmap(bitmap)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                // Optional: fallback image if decoding fails
+                                projectPfp.setImageResource(R.drawable.placeholder_pfp)
+                            }
+                        } else {
+                            projectPfp.setImageResource(R.drawable.placeholder_pfp)
+                        }
+                    } else {
+                        projectPfp.setImageResource(R.drawable.placeholder_pfp)
+                    }
 
                 } else {
                     Toast.makeText(this, "Failed to load project", Toast.LENGTH_SHORT).show()
                 }
             },
-            { Toast.makeText(this, "Network error: ${it.message}", Toast.LENGTH_SHORT).show() }
-        )
+            {
+                Toast.makeText(this, "Network error: ${it.message}", Toast.LENGTH_SHORT).show()
+            })
 
         queue.add(request)
     }
+
+
     /** FETCH ACTIVE TASKS OF THIS PROJECT */
     private fun fetchActiveTasks(projectId: Int) {
 

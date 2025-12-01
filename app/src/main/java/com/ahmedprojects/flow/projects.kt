@@ -13,7 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import org.json.JSONObject
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+
 
 class projects : AppCompatActivity() {
 
@@ -58,6 +63,7 @@ class projects : AppCompatActivity() {
             val intent = Intent(this, manage_project_page::class.java)
             intent.putExtra("project_id", clickedProject.id)
             startActivity(intent)
+
         }
 
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -117,7 +123,13 @@ class projects : AppCompatActivity() {
         }*/
     }
 
+
+
+
     private fun loadUserProjects(userId: Int) {
+        val db = AppDatabase.getInstance(this)
+        val projectDao = db.projectDao()
+
         val queue = Volley.newRequestQueue(this)
         val url = ip.IP + "get_user_projects.php"
 
@@ -129,35 +141,88 @@ class projects : AppCompatActivity() {
             { response ->
                 try {
                     if (response.getBoolean("success")) {
-                        val projects = response.getJSONArray("projects")
-                        projectList.clear()
-                        for (i in 0 until projects.length()) {
-                            val obj = projects.getJSONObject(i)
-                            val project = Project(
+                        val projectsJson = response.getJSONArray("projects")
+                        val list = ArrayList<Project>()
+
+                        val roomList = ArrayList<ProjectEntity>()
+
+                        for (i in 0 until projectsJson.length()) {
+                            val obj = projectsJson.getJSONObject(i)
+
+                            val pictureBase64 = if (obj.has("picture_base64") && !obj.isNull("picture_base64")) {
+                                obj.getString("picture_base64")
+                            } else null
+
+                            val p = Project(
                                 id = obj.getInt("id"),
                                 name = obj.getString("name"),
                                 description = obj.getString("description"),
                                 role = obj.getString("role"),
-                                membersCount = obj.getInt("membersCount")
+                                membersCount = obj.getInt("membersCount"),
+                                pictureUrl = pictureBase64
                             )
-                            projectList.add(project)
+
+                            list.add(p)
+
+                            // Optional: save to Room if you want offline caching (without picture)
+                            roomList.add(
+                                ProjectEntity(
+                                    id = p.id,
+                                    name = p.name,
+                                    description = p.description,
+                                    ownerId = -1,
+                                    joinCode = "",
+                                    role = p.role,
+                                    membersCount = p.membersCount
+                                )
+                            )
                         }
+
+                        projectList.clear()
+                        projectList.addAll(list)
                         adapter.notifyDataSetChanged()
-                    } else {
-                        Toast.makeText(this, "No projects found", Toast.LENGTH_SHORT).show()
+
+                        // save to local DB
+                        lifecycleScope.launch {
+                            projectDao.clearProjects()
+                            projectDao.insertProjects(roomList)
+                        }
                     }
-                } catch (e: Exception) {
-                    Log.d("PROJECTS_ERROR", e.toString())
-                    Toast.makeText(this, "Error parsing response", Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) {
+                    Toast.makeText(this, "Failed to parse projects", Toast.LENGTH_SHORT).show()
                 }
             },
             { error ->
-                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
-                Log.e("PROJECTS_ERROR", error.toString())
-            })
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val cached = projectDao.getAllProjects()
+                    if (cached.isNotEmpty()) {
+                        val mapped = cached.map {
+                            Project(
+                                id = it.id,
+                                name = it.name,
+                                description = it.description,
+                                role = it.role,
+                                membersCount = it.membersCount,
+                                pictureUrl = null // Room cache does not store pictureBase64
+                            )
+                        }
+                        launch(Dispatchers.Main) {
+                            projectList.clear()
+                            projectList.addAll(mapped)
+                            adapter.notifyDataSetChanged()
+                        }
+                    } else {
+                        launch(Dispatchers.Main) {
+                            Toast.makeText(this@projects, "Offline and no cached projects", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        )
 
         queue.add(request)
     }
+
 
     private fun joinProject(userId: Int, joinCode: String) {
         val queue = Volley.newRequestQueue(this)

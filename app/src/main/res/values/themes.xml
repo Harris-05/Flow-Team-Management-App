@@ -6,4 +6,9 @@
     </style>
 
     <style name="Theme.Flow_Frontend_Ahmed" parent="Base.Theme.Flow_Frontend_Ahmed" />
+
+    <style name="AppTheme.DatePicker" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="colorAccent">@color/dark_blue</item>
+    </style>
+
 </resources>
