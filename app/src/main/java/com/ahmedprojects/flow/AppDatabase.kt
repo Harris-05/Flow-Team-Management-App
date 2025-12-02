@@ -5,13 +5,14 @@ import androidx.room.RoomDatabase
 import android.content.Context
 
 @Database(
-    entities = [ProjectEntity::class, PendingProjectEntity::class],
-    version = 2,
+    entities = [ProjectEntity::class, PendingProjectEntity::class, TaskEntity::class], // add TaskEntity
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
     abstract fun pendingProjectDao(): PendingProjectDao
+    abstract fun taskDao(): TaskDao   // add taskDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -22,8 +23,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "flow_local.db"
-                ).fallbackToDestructiveMigration().build().also { INSTANCE = it }
-
+                )
+                    .fallbackToDestructiveMigration() // auto drop old DB if schema changed
+                    .build()
+                    .also { INSTANCE = it }
             }
     }
 }

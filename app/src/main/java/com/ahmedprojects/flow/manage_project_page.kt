@@ -175,7 +175,8 @@ class manage_project_page : AppCompatActivity() {
                         organisationName = obj.getString("project_name"),
                         updateRequested = obj.optInt("update_requested", 0) == 1,
                         dueDate = obj.optString("deadline", ""),
-                        percentageCompleted = obj.optInt("completion", 0)
+                        percentageCompleted = obj.optInt("completion", 0),
+                        assignedByName = ""
                     )
 
                     taskList.add(task)

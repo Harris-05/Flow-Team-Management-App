@@ -50,7 +50,9 @@ class TaskAdapter(
             if (task.updateRequested) View.VISIBLE else View.GONE
 
         // Fetch username for assigned_by
-        fetchUserName(task.assignedBy, holder)
+        //fetchUserName(task.assignedBy, holder)
+        holder.tvTeamName.text = "Assigned By: ${task.assignedByName}"
+
 
         // Priority color
         when (task.priority.lowercase()) {

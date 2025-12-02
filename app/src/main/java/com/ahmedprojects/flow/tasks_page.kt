@@ -14,6 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class tasks_page : AppCompatActivity() {
@@ -22,42 +26,47 @@ class tasks_page : AppCompatActivity() {
     private lateinit var adapter: TaskAdapter
 
     private val tasksForYou = mutableListOf<TaskModel>()
-    private val tasksByYou = mutableListOf<TaskModel>()
-
-    var userId = -1
-    private var IP = IP_String().IP
+    private var userId = -1
+    private val IP = IP_String().IP
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tasks_page)
 
-        val homebtn= findViewById<LinearLayout>(R.id.homeBtn)
-        val projectsbtn= findViewById<LinearLayout>(R.id.projectsBtn)
-        val notificationsbtn= findViewById<LinearLayout>(R.id.notificationsBtn)
-        val profilebtn= findViewById<LinearLayout>(R.id.profileBtn)
+        setupBottomNav()
+        setupUserId()
+        setupInsets()
+        setupRecyclerView()
+        setupTabs()
+        setupStatusFilters()
 
-        homebtn.setOnClickListener {
-            val intent = Intent(this, home_page::class.java)
-            startActivity(intent)
-         }
-        projectsbtn.setOnClickListener {
-            val intent = Intent(this, projects::class.java)
-            startActivity(intent)
+        loadTasksOfflineThenOnline()
+    }
 
+    private fun setupBottomNav() {
+        findViewById<LinearLayout>(R.id.homeBtn).setOnClickListener {
+            startActivity(Intent(this, home_page::class.java))
         }
+        findViewById<LinearLayout>(R.id.projectsBtn).setOnClickListener {
+            startActivity(Intent(this, projects::class.java))
+        }
+    }
 
-
+    private fun setupUserId() {
         val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
-        val CuserId = prefs.getInt("id", -1)
-        userId = CuserId
+        userId = prefs.getInt("id", -1)
+    }
 
+    private fun setupInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
 
+    private fun setupRecyclerView() {
         recyclerView = findViewById(R.id.recyclerViewTasks)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = TaskAdapter(mutableListOf(), onClick = { task ->
@@ -66,10 +75,6 @@ class tasks_page : AppCompatActivity() {
             startActivity(intent)
         })
         recyclerView.adapter = adapter
-
-        setupTabs()
-        setupStatusFilters()
-        fetchTasks()
     }
 
     private fun setupTabs() {
@@ -84,12 +89,10 @@ class tasks_page : AppCompatActivity() {
         }
 
         tabByYou.setOnClickListener {
-            val intent = Intent(this, tasks_you_page::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, tasks_you_page::class.java))
         }
     }
 
-    // 🔵 NEW FILTER SETUP
     private fun setupStatusFilters() {
         val all: TextView = findViewById(R.id.all)
         val pending: TextView = findViewById(R.id.pending)
@@ -99,56 +102,73 @@ class tasks_page : AppCompatActivity() {
             adapter.updateTasks(tasksForYou)
             highlightTab(all, pending, completed)
         }
-
         pending.setOnClickListener {
-            val filtered = tasksForYou.filter { it.status.equals("pending", ignoreCase = true) }
+            val filtered = tasksForYou.filter { it.status.equals("pending", true) }
             adapter.updateTasks(filtered)
             highlightTab(pending, all, completed)
         }
-
         completed.setOnClickListener {
-            val filtered = tasksForYou.filter { it.status.equals("completed", ignoreCase = true) }
+            val filtered = tasksForYou.filter { it.status.equals("completed", true) }
             adapter.updateTasks(filtered)
             highlightTab(completed, all, pending)
         }
     }
 
-    // 🔵 Highlight the active filter
     private fun highlightTab(active: TextView, vararg others: TextView) {
         active.setBackgroundResource(R.drawable.oblong_blue)
         active.setTextColor(resources.getColor(R.color.white))
-
         others.forEach {
             it.setBackgroundResource(R.drawable.oblong_white)
             it.setTextColor(resources.getColor(R.color.blue))
         }
     }
 
-    private fun fetchTasks() {
+    // 🔹 Load offline tasks first, then online
+    private fun loadTasksOfflineThenOnline() {
+        val db = AppDatabase.getInstance(this)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            // Load offline tasks assigned TO user
+            val offlineTasks = db.taskDao().getTasksForUser(userId)
+            val filteredOffline = offlineTasks.filter { it.assignedBy != userId }
+            tasksForYou.clear()
+            tasksForYou.addAll(filteredOffline.map { it.toModel() })
+
+            withContext(Dispatchers.Main) {
+                adapter.updateTasks(tasksForYou)
+            }
+
+            // Fetch online tasks
+            fetchTasksOnline(db)
+        }
+    }
+
+    private fun fetchTasksOnline(db: AppDatabase) {
         val url = "$IP/get_user_tasks.php?user_id=$userId"
         val queue = Volley.newRequestQueue(this)
 
         val request = JsonObjectRequest(Request.Method.GET, url, null,
-            { response -> parseTasks(response) },
+            { response ->
+                parseTasksAndFetchNames(db, response)
+            },
             { error ->
                 Toast.makeText(this, "Failed to fetch tasks: ${error.message}", Toast.LENGTH_SHORT).show()
-            })
-
+            }
+        )
         queue.add(request)
     }
 
-    private fun parseTasks(response: JSONObject) {
-        if (!response.getBoolean("success")) {
-            Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        tasksForYou.clear()
-        tasksByYou.clear()
+    // 🔹 Parse tasks, fetch assignedByName asynchronously, save to DB
+    private fun parseTasksAndFetchNames(db: AppDatabase, response: JSONObject) {
+        if (!response.getBoolean("success")) return
 
         val tasksArray = response.getJSONArray("tasks")
+        tasksForYou.clear()
+
         for (i in 0 until tasksArray.length()) {
             val obj = tasksArray.getJSONObject(i)
+            val assignedTo = obj.getInt("assigned_to")
+            if (assignedTo != userId) continue // filter offline & online properly
 
             val task = TaskModel(
                 id = obj.getInt("id"),
@@ -157,18 +177,62 @@ class tasks_page : AppCompatActivity() {
                 priority = obj.getString("priority"),
                 status = obj.getString("status"),
                 assignedBy = obj.getInt("assigned_by"),
+                assignedByName = "Loading...",
                 organisationName = obj.getString("project_name"),
                 updateRequested = obj.optInt("update_requested", 0) == 1,
                 percentageCompleted = obj.optInt("completion", 0),
                 dueDate = obj.optString("deadline", "N/A")
             )
+            tasksForYou.add(task)
 
-            if (obj.getInt("assigned_to") == userId) tasksForYou.add(task)
-            if (obj.getInt("assigned_by") == userId) tasksByYou.add(task)
+            // Fetch assignedByName
+            fetchUserName(task.assignedBy) { name ->
+                task.assignedByName = name
+                runOnUiThread { adapter.updateTasks(tasksForYou) }
+
+                // Save to local DB
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.taskDao().insertTasks(listOf(task.toEntity(userId)))
+                }
+            }
         }
 
-        // Default: ALL tab selected
-        adapter.updateTasks(tasksForYou)
-        highlightTab(findViewById(R.id.all), findViewById(R.id.pending), findViewById(R.id.completed))
+        // Initial update
+        runOnUiThread {
+            adapter.updateTasks(tasksForYou)
+            highlightTab(findViewById(R.id.all), findViewById(R.id.pending), findViewById(R.id.completed))
+        }
+    }
+
+    // 🔹 Fetch username helper
+    private fun fetchUserName(userId: Int, onResult: (String) -> Unit) {
+        val url = "$IP/getUserName.php"
+        val queue = Volley.newRequestQueue(this)
+        val json = JSONObject().apply { put("userId", userId) }
+
+        val request = JsonObjectRequest(Request.Method.POST, url, json,
+            { response ->
+                val name = if (response.getBoolean("success")) response.getString("name") else "Unknown"
+                onResult(name)
+            },
+            { _ -> onResult("Error") }
+        )
+        queue.add(request)
     }
 }
+
+// 🔹 Extension helpers
+fun TaskEntity.toModel() = TaskModel(
+    id = id,
+    title = title,
+    description = description,
+    priority = priority,
+    status = status,
+    assignedBy = assignedBy,
+    assignedByName = assignedByName,
+    organisationName = organisationName,
+    updateRequested = updateRequested,
+    percentageCompleted = percentageCompleted,
+    dueDate = dueDate
+)
+
