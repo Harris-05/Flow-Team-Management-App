@@ -8,5 +8,6 @@ class MyApplication : Application() {
         super.onCreate()
         val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
         registerReceiver(NetworkReceiver(), filter)
+
     }
 }

@@ -1,21 +1,30 @@
 package com.ahmedprojects.flow
+
+import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import android.content.Context
 
 @Database(
-    entities = [ProjectEntity::class, PendingProjectEntity::class, TaskEntity::class], // add TaskEntity
-    version = 4,
+    entities = [
+        ProjectEntity::class,
+        PendingProjectEntity::class,
+        TaskEntity::class,
+        PendingTaskEntity::class    // Make sure PendingTaskEntity is included
+    ],
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun projectDao(): ProjectDao
     abstract fun pendingProjectDao(): PendingProjectDao
-    abstract fun taskDao(): TaskDao   // add taskDao
+    abstract fun taskDao(): TaskDao
+    abstract fun pendingTaskDao(): PendingTaskDao
 
     companion object {
-        @Volatile private var INSTANCE: AppDatabase? = null
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
 
         fun getInstance(context: Context): AppDatabase =
             INSTANCE ?: synchronized(this) {
@@ -24,7 +33,8 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "flow_local.db"
                 )
-                    .fallbackToDestructiveMigration() // auto drop old DB if schema changed
+                    // WARNING: fallbackToDestructiveMigration will wipe all data if version changes
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { INSTANCE = it }
             }

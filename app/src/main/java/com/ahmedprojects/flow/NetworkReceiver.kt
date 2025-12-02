@@ -11,8 +11,9 @@ import com.android.volley.toolbox.Volley
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
-
+import kotlin.coroutines.resume
 
 class NetworkReceiver : BroadcastReceiver() {
 
@@ -20,17 +21,22 @@ class NetworkReceiver : BroadcastReceiver() {
         if (!isOnline(context)) return
 
         val db = AppDatabase.getInstance(context)
-        val pendingDao = db.pendingProjectDao()
+        val pendingProjectDao = db.pendingProjectDao()
+        val pendingTaskDao = db.pendingTaskDao()
 
         CoroutineScope(Dispatchers.IO).launch {
-            val pending = pendingDao.getPending()
-            if (pending.isEmpty()) return@launch
-
-            pending.forEach { project ->
+            // Sync pending projects
+            val pendingProjects = pendingProjectDao.getPending()
+            pendingProjects.forEach { project ->
                 val success = syncPendingProject(context, project)
-                if (success) {
-                    pendingDao.deletePending(project)
-                }
+                if (success) pendingProjectDao.deletePending(project)
+            }
+
+            // Sync pending tasks
+            val pendingTasks = pendingTaskDao.getAllTasks()
+            pendingTasks.forEach { task ->
+                val success = syncPendingTask(context, task)
+                if (success) pendingTaskDao.deleteTask(task)
             }
         }
     }
@@ -42,11 +48,11 @@ class NetworkReceiver : BroadcastReceiver() {
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
+    // 🔹 Sync pending project to server
     private suspend fun syncPendingProject(context: Context, p: PendingProjectEntity): Boolean {
         return try {
             val queue = Volley.newRequestQueue(context)
-            val ip = IP_String()
-            val url = ip.IP + "create_project.php"
+            val url = IP_String().IP + "create_project.php"
 
             val jsonBody = JSONObject().apply {
                 put("ownerId", p.ownerId)
@@ -55,21 +61,43 @@ class NetworkReceiver : BroadcastReceiver() {
                 put("joinCode", p.joinCode)
             }
 
-            val response = kotlinx.coroutines.suspendCancellableCoroutine<Boolean> { cont ->
-                val req = JsonObjectRequest(
-                    Request.Method.POST, url, jsonBody,
-                    { json ->
-                        cont.resume(json.optBoolean("success")) {}
-                    },
+            suspendCancellableCoroutine<Boolean> { cont ->
+                val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
+                    { response -> cont.resume(response.optBoolean("success")) {} },
                     { cont.resume(false) {} }
                 )
-                queue.add(req)
+                queue.add(request)
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    // 🔹 Sync pending task to server
+    private suspend fun syncPendingTask(context: Context, t: PendingTaskEntity): Boolean {
+        return try {
+            val queue = Volley.newRequestQueue(context)
+            val url = IP_String().IP + "create_task.php"
+
+            val jsonBody = JSONObject().apply {
+                put("project_id", t.projectId)
+                put("assigned_to", t.assignedTo)
+                put("assigned_by", t.assignedBy)
+                put("title", t.title)
+                put("description", t.description)
+                put("priority", t.priority)
+                put("deadline", t.deadline)
             }
 
-            response
+            suspendCancellableCoroutine<Boolean> { cont ->
+                val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
+                    { response -> cont.resume(response.optBoolean("success")) {} },
+                    { cont.resume(false) {} }
+                )
+                queue.add(request)
+            }
         } catch (e: Exception) {
             false
         }
     }
 }
-

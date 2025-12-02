@@ -76,9 +76,6 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-
-
-
         <activity
             android:name=".splash_screen"
             android:exported="true">
