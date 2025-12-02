@@ -1,5 +1,6 @@
 package com.ahmedprojects.flow
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.util.Log
 import android.widget.*
@@ -9,6 +10,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
+import java.util.Calendar
 
 class create_task : AppCompatActivity() {
 
@@ -16,8 +18,8 @@ class create_task : AppCompatActivity() {
     private lateinit var spinnerPriority: Spinner
     private lateinit var etTitle: EditText
     private lateinit var etDescription: EditText
-    private lateinit var etDeadline: DatePicker
-    private lateinit var btnCreate: Button
+    private lateinit var etDeadline: TextView
+    private lateinit var btnCreate: RelativeLayout
     private lateinit var tvProjectName: TextView
 
     private var IP = IP_String().IP
@@ -44,7 +46,20 @@ class create_task : AppCompatActivity() {
         spinnerUsers = findViewById(R.id.spinnerAssignTo)
         etTitle = findViewById(R.id.etTitle)
         etDescription = findViewById(R.id.etDescription)
-        etDeadline = findViewById(R.id.etDeadline)
+        etDeadline= findViewById(R.id.etDeadline)
+        etDeadline.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val datePicker = DatePickerDialog(this, { _, y, m, d ->
+                val formatted = "$y-${m + 1}-$d"
+                etDeadline.text = formatted
+            }, year, month, day)
+
+            datePicker.show()
+        }
         spinnerPriority = findViewById(R.id.spinnerPriority)
         btnCreate = findViewById(R.id.btnCreateTask)
 
@@ -140,10 +155,7 @@ class create_task : AppCompatActivity() {
         val assignedUserId =
             if (membersList.isNotEmpty()) membersList[spinnerUsers.selectedItemPosition].id else -1
 
-        val day = etDeadline.dayOfMonth
-        val month = etDeadline.month + 1
-        val year = etDeadline.year
-        val deadline = "$year-$month-$day"
+        val deadline = etDeadline.text.toString()
 
         val priority = spinnerPriority.selectedItem.toString()
 

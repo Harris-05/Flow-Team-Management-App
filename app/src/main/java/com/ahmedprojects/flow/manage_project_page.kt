@@ -181,7 +181,7 @@ class manage_project_page : AppCompatActivity() {
                     taskList.add(task)
                 }
 
-                rvTasks.adapter = TaskAdapter(taskList)
+               // rvTasks.adapter = TaskAdapter(taskList)
             },
             {
                 Toast.makeText(this, "Failed to fetch tasks", Toast.LENGTH_SHORT).show()

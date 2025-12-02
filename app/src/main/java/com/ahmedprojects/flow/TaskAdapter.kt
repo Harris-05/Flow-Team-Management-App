@@ -11,7 +11,8 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 
 class TaskAdapter(
-    private var taskList: List<TaskModel>,
+    private var taskList: MutableList<TaskModel>,
+    private val onClick: (TaskModel) -> Unit, // Click listener passed from Activity
     private val IP: String = IP_String().IP
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
@@ -23,7 +24,6 @@ class TaskAdapter(
         val tvUpdateRequested: TextView = itemView.findViewById(R.id.tvUpdateRequested)
         val tvTeamName: TextView = itemView.findViewById(R.id.TeamName)
         val tvDueDate: TextView = itemView.findViewById(R.id.tvDueDate)
-
         val tvPercentage: TextView = itemView.findViewById(R.id.tvPercentCompleted)
         val tvOrganisationName: TextView = itemView.findViewById(R.id.OrganisationName)
         val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
@@ -46,11 +46,10 @@ class TaskAdapter(
         holder.tvDescription.text = task.description
         holder.tvPercentage.text = "${task.percentageCompleted}% Completed"
         holder.tvDueDate.text = "Due: ${task.dueDate}"
-
         holder.tvUpdateRequested.visibility =
             if (task.updateRequested) View.VISIBLE else View.GONE
 
-        // 🔥 Load username for assigned_by
+        // Fetch username for assigned_by
         fetchUserName(task.assignedBy, holder)
 
         // Priority color
@@ -66,16 +65,22 @@ class TaskAdapter(
             "pending" -> holder.tvStatus.setTextColor(holder.itemView.context.getColor(R.color.gray))
             "completed" -> holder.tvStatus.setTextColor(holder.itemView.context.getColor(R.color.green))
         }
+
+        // 🔥 Handle click to open Task_Details
+        holder.itemView.setOnClickListener {
+            onClick(task)
+        }
     }
 
     override fun getItemCount(): Int = taskList.size
 
     fun updateTasks(newTasks: List<TaskModel>) {
-        taskList = newTasks
+        taskList.clear()
+        taskList.addAll(newTasks)
         notifyDataSetChanged()
     }
 
-    // 🔥 Fetch username and update the card
+    // Fetch username asynchronously
     private fun fetchUserName(userId: Int, holder: TaskViewHolder) {
         val url = "$IP/getUserName.php"
         val queue = Volley.newRequestQueue(holder.itemView.context)
@@ -88,16 +93,15 @@ class TaskAdapter(
             { response ->
                 if (response.getBoolean("success")) {
                     val name = response.getString("name")
-                    holder.tvTeamName.text = "Assigned By: " + name
+                    holder.tvTeamName.text = "Assigned By: $name"
                 } else {
-                    holder.tvTeamName.text = "Unknown"
+                    holder.tvTeamName.text = "Assigned By: Unknown"
                 }
             },
             {
-                holder.tvTeamName.text = "Error"
+                holder.tvTeamName.text = "Assigned By: Error"
             }
         )
-
         queue.add(request)
     }
 }
