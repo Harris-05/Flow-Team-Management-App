@@ -54,6 +54,8 @@ class manage_project_page : AppCompatActivity() {
         // Hide FAB by default
         fabCreateTask.hide()
 
+
+
         // Get project ID
         val projectId = intent.getIntExtra("project_id", -1)
         if (projectId == -1) {
@@ -61,6 +63,13 @@ class manage_project_page : AppCompatActivity() {
             finish()
             return
         }
+
+        btnInviteUsers.setOnClickListener {
+            val intent = Intent(this, invite_users_page::class.java)
+            intent.putExtra("project_id", projectId)
+            startActivity(intent)
+        }
+
 
         // Load project details
         loadProjectDetails(projectId)

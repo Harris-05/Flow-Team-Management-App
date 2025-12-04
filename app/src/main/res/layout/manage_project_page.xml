@@ -121,7 +121,7 @@
                 android:id="@+id/btnInviteUsers"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:background="@drawable/create_organisation_button"
+                android:background="@drawable/join_button"
                 android:gravity="center"
                 android:layout_marginBottom="20dp">
 

@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
-        android:usesCleartextTraffic="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/flow_icon"
         android:label="@string/app_name"
         android:roundIcon="@drawable/flow_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Flow_Frontend_Ahmed">
+        android:theme="@style/Theme.Flow_Frontend_Ahmed"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".notifications_page"
+            android:exported="false" />
+        <activity
+            android:name=".invite_users_page"
+            android:exported="false" />
         <activity
             android:name=".chat_page"
             android:exported="false" />
@@ -23,7 +30,6 @@
         <activity
             android:name=".all_chats_page"
             android:exported="false" />
-
         <activity
             android:name=".project_members_page"
             android:exported="false" />
@@ -70,12 +76,14 @@
             android:name=".home_page"
             android:exported="false" />
 
-        <receiver android:name=".NetworkReceiver"
+        <receiver
+            android:name=".NetworkReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+
         <activity
             android:name=".splash_screen"
             android:exported="true">
@@ -85,9 +93,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
-
-
 
 </manifest>

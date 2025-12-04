@@ -153,7 +153,7 @@
                                     android:layout_height="25dp"
                                     android:layout_centerInParent="true"
                                     android:contentDescription="Warning Icon"
-                                    android:src="@drawable/warning_icon" />
+                                    android:src="@drawable/danger_icon" />
                             </RelativeLayout>
 
                             <LinearLayout

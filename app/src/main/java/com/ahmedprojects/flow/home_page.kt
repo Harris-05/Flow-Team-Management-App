@@ -1,6 +1,7 @@
 package com.ahmedprojects.flow
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -9,10 +10,12 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import de.hdodenhof.circleimageview.CircleImageView
 import org.w3c.dom.Text
 
+@Suppress("DEPRECATION")
 class home_page : AppCompatActivity() {
 
     private var ip: IP_String = IP_String()
@@ -26,6 +29,9 @@ class home_page : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)  // enable edge-to-edge
+        window.statusBarColor = Color.TRANSPARENT  // make status bar transparent
 
         val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
         val userId = prefs.getInt("id", -1)
@@ -64,11 +70,11 @@ class home_page : AppCompatActivity() {
             val intent = Intent(this, all_chats_page::class.java)
             startActivity(intent)
         }
-        /*notificationsBtn.setOnClickListener {
+        notificationsBtn.setOnClickListener {
             val intent = Intent(this, notifications_page::class.java)
             startActivity(intent)
         }
-        profileBtn.setOnClickListener {
+        /*profileBtn.setOnClickListener {
             val intent = Intent(this, profile_page::class.java)
             startActivity(intent)
         }*/
