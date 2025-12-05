@@ -1,21 +1,28 @@
 package com.ahmedprojects.flow
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import android.graphics.BitmapFactory
-import android.util.Base64
-import android.util.Log
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
@@ -48,6 +55,7 @@ class Task_Details : AppCompatActivity() {
     private var userRole = "member"
 
     private val IP = IP_String().IP
+    private lateinit var db: AppDatabase
 
     private val imagePickerLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -62,6 +70,7 @@ class Task_Details : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.task_details)
 
+        db = AppDatabase.getInstance(this)
         taskId = intent.getIntExtra("task_id", -1)
         if (taskId == -1) {
             Toast.makeText(this, "Invalid task", Toast.LENGTH_SHORT).show()
@@ -76,6 +85,9 @@ class Task_Details : AppCompatActivity() {
         setupRecyclerView()
         setupActions()
         loadTaskDetails()
+        if (isNetworkAvailable()) {
+            syncPendingUpdates()
+        }
     }
 
     private fun bindViews() {
@@ -86,6 +98,7 @@ class Task_Details : AppCompatActivity() {
         tvDeadline = findViewById(R.id.tvDeadline)
         tvPriority = findViewById(R.id.tvPriority)
         tvStatus = findViewById(R.id.tvStatus)
+
         managerButtons = findViewById(R.id.managerButtons)
         btnRequestUpdate = findViewById(R.id.btnRequestUpdate)
         btnMarkCompleted = findViewById(R.id.btnMarkCompleted)
@@ -105,24 +118,45 @@ class Task_Details : AppCompatActivity() {
     }
 
     private fun setupActions() {
-        btnChooseImage.setOnClickListener {
-            imagePickerLauncher.launch("image/*")
-        }
-
-        btnSubmitUpdate.setOnClickListener {
-            sendUpdate()
-        }
-
-        btnRequestUpdate.setOnClickListener {
-            requestUpdate()
-        }
-
-        btnMarkCompleted.setOnClickListener {
-            markTaskCompleted()
-        }
+        btnChooseImage.setOnClickListener { imagePickerLauncher.launch("image/*") }
+        btnSubmitUpdate.setOnClickListener { queueUpdate() }
+        btnRequestUpdate.setOnClickListener { requestUpdate() }
+        btnMarkCompleted.setOnClickListener { markTaskCompleted() }
     }
 
+    /** Request update (manager functionality) */
+    private fun requestUpdate() {
+        val url = "$IP/request_update.php"
+        val jsonBody = JSONObject().apply {
+            put("task_id", taskId)
+            put("user_id", userId)
+        }
+
+        val queue = Volley.newRequestQueue(this)
+        val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
+            { response ->
+                if (response.optBoolean("success")) {
+                    Toast.makeText(this, "Update requested successfully", Toast.LENGTH_SHORT).show()
+                    loadTaskDetails()
+                } else {
+                    val message = response.optString("message", "Failed to request update")
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                }
+            },
+            { error ->
+                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
+                Log.d("NETWORK_ERROR", "Request Update failed: ${error.message}")
+            })
+        queue.add(request)
+    }
+
+    /** Load task details from server, fetch names, save to cache */
     private fun loadTaskDetails() {
+        if (!isNetworkAvailable()) {
+            loadTaskDetailsFromCache()
+            return
+        }
+
         val url = "$IP/get_task_details.php"
         val jsonBody = JSONObject().apply {
             put("task_id", taskId)
@@ -138,102 +172,137 @@ class Task_Details : AppCompatActivity() {
                 }
 
                 val taskObj = response.getJSONObject("task")
-                tvTitle.text = taskObj.getString("title")
-                tvDescription.text = taskObj.getString("description")
                 val assignedById = taskObj.getInt("assigned_by")
                 val assignedToId = taskObj.getInt("assigned_to")
 
-                fetchUserName(assignedById) { name ->
-                    tvAssignedBy.text = name
-                }
-                fetchUserName(assignedToId) { name ->
-                    tvAssignedTo.text = name
-                }
-
+                tvTitle.text = taskObj.getString("title")
+                tvDescription.text = taskObj.getString("description")
                 tvDeadline.text = taskObj.getString("deadline")
                 tvPriority.text = taskObj.getString("priority").capitalize()
                 tvStatus.text = taskObj.getString("status").replace("_", " ").capitalize()
 
-                userRole = if (userId == taskObj.getInt("assigned_by")) "manager" else "member"
+                // Fetch names using old logic
+                fetchUserName(assignedById) { assignedByName ->
+                    tvAssignedBy.text = assignedByName
+                    fetchUserName(assignedToId) { assignedToName ->
+                        tvAssignedTo.text = assignedToName
 
-
-                if (userRole == "manager") {
-                    Log.e("USER_ROLE",userRole)
-                    managerButtons.visibility = Button.VISIBLE
-                    btnRequestUpdate.visibility = Button.VISIBLE
-                    btnMarkCompleted.visibility = Button.VISIBLE
-                    memberUpdateSection.visibility = LinearLayout.GONE
-                } else {
-                    btnRequestUpdate.visibility = Button.GONE
-                    btnMarkCompleted.visibility = Button.GONE
-                    memberUpdateSection.visibility = LinearLayout.VISIBLE
+                        // Save to Room cache
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            db.taskCacheDao().insertTask(
+                                TaskCacheEntity(
+                                    taskId = taskId,
+                                    title = taskObj.getString("title"),
+                                    description = taskObj.getString("description"),
+                                    assignedBy = assignedById,
+                                    assignedTo = assignedToId,
+                                    assignedByName = assignedByName,
+                                    assignedToName = assignedToName,
+                                    deadline = taskObj.getString("deadline"),
+                                    priority = taskObj.getString("priority"),
+                                    status = taskObj.getString("status")
+                                )
+                            )
+                        }
+                    }
                 }
+
+                userRole = if (userId == assignedById) "manager" else "member"
+                managerButtons.visibility = if (userRole == "manager") Button.VISIBLE else LinearLayout.GONE
+                btnRequestUpdate.visibility = if (userRole == "manager") Button.VISIBLE else Button.GONE
+                btnMarkCompleted.visibility = if (userRole == "manager") Button.VISIBLE else Button.GONE
+                memberUpdateSection.visibility = if (userRole == "member") LinearLayout.VISIBLE else LinearLayout.GONE
 
                 // Load updates
                 updatesList.clear()
                 val updatesArray = response.getJSONArray("updates")
+                val cacheUpdates = mutableListOf<TaskUpdateCacheEntity>()
                 for (i in 0 until updatesArray.length()) {
                     val u = updatesArray.getJSONObject(i)
-                    updatesList.add(
-                        TaskUpdate(
-                            id = u.getInt("id"),
-                            userName = u.getString("user_name"),
-                            message = u.optString("message", ""),
-                            imageUrl = u.optString("image_url", ""),
-                            createdAt = u.getString("created_at")
+                    val update = TaskUpdate(
+                        id = u.getInt("id"),
+                        userName = u.getString("user_name"),
+                        message = u.optString("message", ""),
+                        imageUrl = u.optString("image_url", ""),
+                        createdAt = u.getString("created_at")
+                    )
+                    updatesList.add(update)
+                    cacheUpdates.add(
+                        TaskUpdateCacheEntity(
+                            id = update.id,
+                            taskId = taskId,
+                            userName = update.userName,
+                            message = update.message,
+                            imageUrl = update.imageUrl,
+                            createdAt = update.createdAt
                         )
                     )
                 }
                 updatesAdapter.notifyDataSetChanged()
-            },
-            { error ->
-                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
-            })
-        queue.add(request)
-    }
-    private fun fetchUserName(userId: Int, callback: (String) -> Unit){
-        val url = "$IP/get_profile_username.php"
 
-        val body = JSONObject().apply {
-            put("userId", userId)
-        }
-
-        val req = JsonObjectRequest(Request.Method.POST, url, body,
-            { res ->
-                if (res.optBoolean("success"))
-                    callback(res.getString("name"))
-                else
-                    callback("Unknown")
-            },
-            { callback("Unknown") }
-        )
-
-        Volley.newRequestQueue(this).add(req)
-    }
-
-    private fun requestUpdate() {
-        val url = "$IP/request_update.php"
-        val jsonBody = JSONObject().apply {
-            put("task_id", taskId)
-            put("user_id", userId)
-        }
-
-        val queue = Volley.newRequestQueue(this)
-        val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
-            { response ->
-                if (response.getBoolean("success")) {
-                    Toast.makeText(this, "Update requested successfully", Toast.LENGTH_SHORT).show()
-                    loadTaskDetails()
-                } else {
-                    Toast.makeText(this, response.optString("message"), Toast.LENGTH_SHORT).show()
+                // Save updates cache
+                lifecycleScope.launch(Dispatchers.IO) {
+                    db.taskUpdateCacheDao().insertUpdates(cacheUpdates)
                 }
+
             }, { error ->
                 Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
             })
         queue.add(request)
     }
 
-    private fun sendUpdate() {
+    /** Load task and updates from Room cache (offline) */
+    private fun loadTaskDetailsFromCache() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val taskCache = db.taskCacheDao().getTask(taskId)
+            val updateCache = db.taskUpdateCacheDao().getUpdates(taskId)
+
+            taskCache?.let {
+                withContext(Dispatchers.Main) {
+                    tvTitle.text = it.title
+                    tvDescription.text = it.description
+                    tvDeadline.text = it.deadline
+                    tvPriority.text = it.priority.capitalize()
+                    tvStatus.text = it.status.replace("_", " ").capitalize()
+                    tvAssignedBy.text = it.assignedByName
+                    tvAssignedTo.text = it.assignedToName
+
+                    userRole = if (userId == it.assignedBy) "manager" else "member"
+                    managerButtons.visibility = if (userRole == "manager") Button.VISIBLE else LinearLayout.GONE
+                    btnRequestUpdate.visibility = if (userRole == "manager") Button.VISIBLE else Button.GONE
+                    btnMarkCompleted.visibility = if (userRole == "manager") Button.VISIBLE else Button.GONE
+                    memberUpdateSection.visibility = if (userRole == "member") LinearLayout.VISIBLE else LinearLayout.GONE
+                }
+            }
+
+            updatesList.clear()
+            updateCache.forEach { u ->
+                updatesList.add(
+                    TaskUpdate(
+                        id = u.id,
+                        userName = u.userName,
+                        message = u.message,
+                        imageUrl = u.imageUrl,
+                        createdAt = u.createdAt
+                    )
+                )
+            }
+            withContext(Dispatchers.Main) { updatesAdapter.notifyDataSetChanged() }
+        }
+    }
+
+    /** Old logic: fetch username by ID from API */
+    private fun fetchUserName(userId: Int, callback: (String) -> Unit) {
+        val url = "$IP/get_profile_username.php"
+        val body = JSONObject().apply { put("userId", userId) }
+        val req = JsonObjectRequest(Request.Method.POST, url, body,
+            { res -> callback(if (res.optBoolean("success")) res.getString("name") else "Unknown") },
+            { callback("Unknown") })
+        Volley.newRequestQueue(this).add(req)
+    }
+
+    /** Queue update offline if no network, else send online */
+    private fun queueUpdate() {
         val message = etUpdateMessage.text.toString().trim()
         if (message.isEmpty() && selectedImageUri == null) {
             Toast.makeText(this, "Please enter a message or select image", Toast.LENGTH_SHORT).show()
@@ -246,18 +315,29 @@ class Task_Details : AppCompatActivity() {
                 val inputStream: InputStream? = contentResolver.openInputStream(uri)
                 val bitmap = BitmapFactory.decodeStream(inputStream)
                 inputStream?.close()
-
                 val baos = ByteArrayOutputStream()
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos)
                 imageBase64 = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP)
-                imageBase64 = imageBase64.replace("\n", "").replace("\r", "")
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show()
-                return
-            }
+            } catch (e: Exception) { e.printStackTrace() }
         }
 
+        val pendingUpdate = PendingTaskUpdateEntity(0, taskId, userId, message, imageBase64)
+        lifecycleScope.launch(Dispatchers.IO) {
+            db.pendingTaskUpdateDao().insertUpdate(pendingUpdate)
+        }
+
+        Toast.makeText(this, "Update queued", Toast.LENGTH_SHORT).show()
+        etUpdateMessage.text.clear()
+        selectedImageUri = null
+        imgPreview.setImageDrawable(null)
+
+        if (isNetworkAvailable()) {
+            syncPendingUpdates()
+        }
+    }
+
+    /** Send a single update online */
+    private fun sendUpdateOnline(message: String, imageBase64: String) {
         val url = "$IP/submit_update.php"
         val jsonBody = JSONObject().apply {
             put("task_id", taskId)
@@ -269,46 +349,46 @@ class Task_Details : AppCompatActivity() {
         val queue = Volley.newRequestQueue(this)
         val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
             { response ->
-                if (response.getBoolean("success")) {
-                    Toast.makeText(this, "Update submitted", Toast.LENGTH_SHORT).show()
-                    etUpdateMessage.text.clear()
-                    selectedImageUri = null
-                    imgPreview.setImageDrawable(null)
+                if (response.optBoolean("success")) {
                     loadTaskDetails()
-                } else {
-                    Toast.makeText(this, "Failed: ${response.optString("message")}", Toast.LENGTH_SHORT).show()
                 }
-            },
-            { error ->
-                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
-                Log.d("NETWORK_ERROR Updatesned", "Network error: ${error.message}")
-            })
+            }, { error -> Log.d("NETWORK_ERROR", "Failed: ${error.message}") })
         queue.add(request)
     }
 
+    /** Mark task as completed (manager) */
     private fun markTaskCompleted() {
         val url = "$IP/mark_task_completed.php"
-        val jsonBody = JSONObject().apply {
-            put("task_id", taskId)
-            put("user_id", userId)
-        }
-
+        val jsonBody = JSONObject().apply { put("task_id", taskId); put("user_id", userId) }
         val queue = Volley.newRequestQueue(this)
         val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
             { response ->
-                if (response.getBoolean("success")) {
-                    Toast.makeText(this, "Task marked as completed", Toast.LENGTH_SHORT).show()
-                    loadTaskDetails()
-                } else {
-                    Toast.makeText(this, "Failed: ${response.optString("message")}", Toast.LENGTH_SHORT).show()
-                }
-            },
-            { error ->
-                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
-            })
+                if (response.optBoolean("success")) loadTaskDetails()
+            }, { error -> Log.d("NETWORK_ERROR", "Failed: ${error.message}") })
         queue.add(request)
     }
 
+    /** Check network availability */
+    private fun isNetworkAvailable(): Boolean {
+        val cm = getSystemService(ConnectivityManager::class.java)
+        val capabilities = cm?.getNetworkCapabilities(cm.activeNetwork)
+        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
+    }
+
+    /** Sync all pending offline updates */
+    private fun syncPendingUpdates() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val pendingUpdates = db.pendingTaskUpdateDao().getAllUpdates()
+            pendingUpdates.forEach { update ->
+                try {
+                    sendUpdateOnline(update.message, update.imageBase64)
+                    db.pendingTaskUpdateDao().deleteUpdate(update)
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
+    /** Task update model */
     data class TaskUpdate(
         val id: Int,
         val userName: String,

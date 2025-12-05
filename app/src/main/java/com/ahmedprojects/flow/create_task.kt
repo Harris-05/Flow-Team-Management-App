@@ -1,6 +1,8 @@
 package com.ahmedprojects.flow
 
 import android.app.DatePickerDialog
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
@@ -65,33 +67,53 @@ class create_task : AppCompatActivity() {
         loadProjectDetails()
         loadProjectMembers()
 
-        // Queue task offline
+        // 🔥 Button: Online → Offline fallback
         btnCreate.setOnClickListener {
-            queueTaskOffline()
+            if (isOnline()) {
+                createTaskOnline()
+            } else {
+                queueTaskOffline()
+            }
         }
-
-        // ✅ No need to call syncPendingTasks(); the BroadcastReceiver handles syncing automatically
     }
+
+    // ---------------- INTERNET CHECK ---------------------
+
+    private fun isOnline(): Boolean {
+        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = cm.activeNetwork ?: return false
+        val cap = cm.getNetworkCapabilities(network) ?: return false
+        return cap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    // ---------------- DATE PICKER ---------------------
 
     private fun showDatePicker() {
         val calendar = Calendar.getInstance()
-        val datePicker = DatePickerDialog(this, { _, y, m, d ->
-            etDeadline.text = "$y-${m + 1}-$d"
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-        datePicker.show()
+        val picker = DatePickerDialog(
+            this,
+            { _, y, m, d -> etDeadline.text = "$y-${m + 1}-$d" },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        picker.show()
     }
+
+    // ---------------- LOAD PROJECT INFO ---------------------
 
     private fun loadProjectDetails() {
         val url = "$IP/get_project_details.php"
         val payload = JSONObject().apply { put("projectId", projectId) }
 
-        val request = JsonObjectRequest(Request.Method.POST, url, payload,
+        val request = JsonObjectRequest(
+            Request.Method.POST, url, payload,
             { response ->
                 if (response.optBoolean("success")) {
                     tvProjectName.text = response.optString("name", "Unknown Project")
                 }
             },
-            { _ ->
+            {
                 Toast.makeText(this, "Failed to load project", Toast.LENGTH_SHORT).show()
             }
         )
@@ -102,11 +124,13 @@ class create_task : AppCompatActivity() {
         val url = "$IP/get_project_members.php"
         val payload = JSONObject().apply { put("project_id", projectId) }
 
-        val request = JsonObjectRequest(Request.Method.POST, url, payload,
+        val request = JsonObjectRequest(
+            Request.Method.POST, url, payload,
             { response ->
                 if (response.optBoolean("success")) {
                     val arr = response.optJSONArray("members")
                     membersList.clear()
+
                     if (arr != null) {
                         for (i in 0 until arr.length()) {
                             val obj = arr.getJSONObject(i)
@@ -115,18 +139,70 @@ class create_task : AppCompatActivity() {
                             if (id != -1) membersList.add(Member(id, name))
                         }
                     }
+
                     val names = membersList.map { it.name }
                     val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, names)
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     spinnerUsers.adapter = adapter
                 }
             },
-            { _ ->
+            {
                 Toast.makeText(this, "Failed to load members", Toast.LENGTH_SHORT).show()
             }
         )
         Volley.newRequestQueue(this).add(request)
     }
+
+    // ---------------- ONLINE TASK CREATION ---------------------
+
+    private fun createTaskOnline() {
+        val title = etTitle.text.toString().trim()
+        val description = etDescription.text.toString().trim()
+
+        if (title.isEmpty()) {
+            etTitle.error = "Title required"
+            return
+        }
+
+        val assignedUserId =
+            if (membersList.isNotEmpty()) membersList[spinnerUsers.selectedItemPosition].id else -1
+
+        val deadline = etDeadline.text.toString()
+        val priority = spinnerPriority.selectedItem.toString()
+
+        val url = "$IP/create_task.php"
+
+        val payload = JSONObject().apply {
+            put("project_id", projectId)
+            put("assigned_to", assignedUserId)
+            put("assigned_by", userId)
+            put("title", title)
+            put("description", description)
+            put("priority", priority)
+            put("deadline", deadline)
+        }
+
+        val request = JsonObjectRequest(
+            Request.Method.POST,
+            url,
+            payload,
+            { response ->
+                if (response.optBoolean("success")) {
+                    Toast.makeText(this, "Task created online", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    queueTaskOffline() // fallback
+                }
+            },
+            {
+                queueTaskOffline() // fallback
+            }
+        )
+
+        Volley.newRequestQueue(this).add(request)
+    }
+
+    // ---------------- OFFLINE STORAGE ---------------------
 
     private fun queueTaskOffline() {
         val title = etTitle.text.toString().trim()
@@ -137,9 +213,8 @@ class create_task : AppCompatActivity() {
             return
         }
 
-        val assignedUserId = if (membersList.isNotEmpty()) membersList[spinnerUsers.selectedItemPosition].id else -1
-        val deadline = etDeadline.text.toString()
-        val priority = spinnerPriority.selectedItem.toString()
+        val assignedUserId =
+            if (membersList.isNotEmpty()) membersList[spinnerUsers.selectedItemPosition].id else -1
 
         val task = PendingTaskEntity(
             projectId = projectId,
@@ -147,8 +222,8 @@ class create_task : AppCompatActivity() {
             assignedBy = userId,
             title = title,
             description = description,
-            priority = priority,
-            deadline = deadline
+            priority = spinnerPriority.selectedItem.toString(),
+            deadline = etDeadline.text.toString()
         )
 
         lifecycleScope.launch(Dispatchers.IO) {

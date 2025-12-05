@@ -10,9 +10,12 @@ import androidx.room.RoomDatabase
         ProjectEntity::class,
         PendingProjectEntity::class,
         TaskEntity::class,
-        PendingTaskEntity::class    // Make sure PendingTaskEntity is included
+        PendingTaskEntity::class,
+        PendingTaskUpdateEntity::class,
+        TaskCacheEntity::class,
+        TaskUpdateCacheEntity::class
     ],
-    version = 6,
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -21,6 +24,11 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun pendingProjectDao(): PendingProjectDao
     abstract fun taskDao(): TaskDao
     abstract fun pendingTaskDao(): PendingTaskDao
+    abstract fun pendingTaskUpdateDao(): PendingTaskUpdateDao
+    abstract fun taskCacheDao(): TaskCacheDao
+    abstract fun taskUpdateCacheDao(): TaskUpdateCacheDao
+
+
 
     companion object {
         @Volatile
@@ -32,7 +40,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "flow_local.db"
-                ).fallbackToDestructiveMigration()
+                )
+                    // WARNING: fallbackToDestructiveMigration will wipe all data if version changes
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { INSTANCE = it }
             }

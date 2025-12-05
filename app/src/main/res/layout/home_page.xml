@@ -448,6 +448,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
+                    android:id="@+id/btnCheckIn"
                     android:background="@drawable/check_in_out_button">
 
                     <TextView

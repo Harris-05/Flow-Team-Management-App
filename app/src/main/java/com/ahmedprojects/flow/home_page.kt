@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -14,8 +15,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import de.hdodenhof.circleimageview.CircleImageView
 import org.w3c.dom.Text
+import kotlin.jvm.java
 
-@Suppress("DEPRECATION")
 class home_page : AppCompatActivity() {
 
     private var ip: IP_String = IP_String()
@@ -52,11 +53,14 @@ class home_page : AppCompatActivity() {
         var profilePic = findViewById<CircleImageView>(R.id.ivProfile)
         var greetingsName = findViewById<TextView>(R.id.tvHello)
         var chatbtn = findViewById<ImageView>(R.id.floatingChat)
-
+        val btncheckin = findViewById<RelativeLayout>(R.id.btnCheckIn)
 
         loadUserProfilePhoto(userId, profilePic)
         loadUserName(userId, greetingsName)
-
+        btncheckin.setOnClickListener {
+            val intent = Intent(this,Select_project::class.java)
+            startActivity(intent)
+        }
 
         projectsBtn.setOnClickListener {
             val intent = Intent(this, projects::class.java)
