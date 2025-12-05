@@ -78,7 +78,7 @@ class project_members_page : AppCompatActivity() {
                         )
                     }
 
-                    adapter = ProjectMembersAdapter(membersList)
+                    adapter = ProjectMembersAdapter(membersList,projectId)
                     findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.membersRecycler).adapter = adapter
 
                 } catch (e: JSONException) {

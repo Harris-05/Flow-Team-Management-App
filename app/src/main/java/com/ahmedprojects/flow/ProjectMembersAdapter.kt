@@ -10,14 +10,18 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 
 class ProjectMembersAdapter(
-    private val members: List<ProjectMembers>
+    private val members: List<ProjectMembers>,
+    private val projectId: Int
 ) : RecyclerView.Adapter<ProjectMembersAdapter.MemberViewHolder>() {
 
     inner class MemberViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.tv_name)
         val email: TextView = view.findViewById(R.id.tv_email)
         val role: TextView = view.findViewById(R.id.tv_role)
+
         val emailButton: ImageView = view.findViewById(R.id.btn_email)
+        val attendanceButton: View = view.findViewById(R.id.btn_attendance) // NEW
+
         val card: CardView = view.findViewById(R.id.main)
     }
 
@@ -34,7 +38,7 @@ class ProjectMembersAdapter(
         holder.email.text = member.email
         holder.role.text = member.role.capitalize()
 
-        // Owner badge color is already handled by your drawable
+        // Owner badge styling
         if (member.role == "owner") {
             holder.role.setBackgroundResource(R.drawable.bg_owner_badge)
             holder.role.setTextColor(0xFF7B1EFF.toInt())
@@ -43,15 +47,7 @@ class ProjectMembersAdapter(
             holder.role.setTextColor(0xFF2563EB.toInt())
         }
 
-        // Click → Go to other profile page
-        /*holder.card.setOnClickListener {
-            val context = holder.itemView.context
-            val intent = Intent(context, other_profile_page::class.java)
-            intent.putExtra("user_id", member.userId)
-            context.startActivity(intent)
-        }*/
-
-        // Email icon (optional click)
+        // 📩 Email click
         holder.emailButton.setOnClickListener {
             val emailIntent = Intent(Intent.ACTION_SEND)
             emailIntent.type = "message/rfc822"
@@ -59,6 +55,16 @@ class ProjectMembersAdapter(
             holder.itemView.context.startActivity(
                 Intent.createChooser(emailIntent, "Send Email")
             )
+        }
+
+        // 🟢 Attendance button click → open attendance screen
+        holder.attendanceButton.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, view_attendance::class.java)
+            intent.putExtra("user_id", member.userId)
+            intent.putExtra("name", member.name)
+            intent.putExtra("project_id", projectId)
+            context.startActivity(intent)
         }
     }
 

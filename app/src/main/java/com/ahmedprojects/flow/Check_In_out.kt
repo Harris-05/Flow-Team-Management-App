@@ -2,11 +2,10 @@ package com.ahmedprojects.flow
 
 import android.os.Bundle
 import android.os.Handler
-import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
@@ -17,55 +16,33 @@ import java.util.*
 
 class Check_In_out : AppCompatActivity() {
 
+    private var ip = IP_String().IP
+    private lateinit var tvProjectName: TextView
     private lateinit var btnCheckIn: LinearLayout
     private lateinit var btnCheckOut: LinearLayout
-    private lateinit var tvActiveTime: TextView
     private lateinit var tvStatus: TextView
-    private lateinit var tvProjectName: TextView
-    private lateinit var tvTime: TextView
-    private lateinit var tvDate: TextView
-    private lateinit var tvLocation: TextView
+    private lateinit var tvActiveTime: TextView
     private lateinit var tvTotalTimeWorked: TextView
+    private lateinit var backBtn : ImageView
 
     private var userId = -1
     private var projectId = -1
     private var projectName = ""
-    private var ip = IP_String().IP
+    private var sessionStart: String? = null
+    private var totalSeconds: Int = 0
 
-    private var handler = Handler()
-    private var isSessionActive = false
-    private var elapsedSeconds = 0
-    private var totalSeconds = 0
-
-    private val updateTimer = object : Runnable {
+    private val handler = Handler()
+    private val timeRunnable = object : Runnable {
         override fun run() {
-            updateCurrentTime()
-            if (isSessionActive) {
-                elapsedSeconds++
-                tvActiveTime.text = "Active Time: ${formatTime(elapsedSeconds)}"
-                tvTotalTimeWorked.text = "Total Worked: ${formatTime(totalSeconds + elapsedSeconds)}"
-            }
+            updateActiveTime()
             handler.postDelayed(this, 1000)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.check_in_out)
-        load_session()
-        // Initialize views
-        btnCheckIn = findViewById(R.id.btnCheckIn)
-        btnCheckOut = findViewById(R.id.btnCheckOut)
-        tvActiveTime = findViewById(R.id.tvActiveTime)
-        tvStatus = findViewById(R.id.tvStatus)
-        tvProjectName = findViewById(R.id.tvProjectName)
-        tvTime = findViewById(R.id.tvTime)
-        tvDate = findViewById(R.id.tvDate)
-        tvLocation = findViewById(R.id.tvLocation)
-        tvTotalTimeWorked = findViewById(R.id.tvTotalTimeWorked)
 
-        // Load user info
         val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
         userId = prefs.getInt("id", -1)
         if (userId == -1) {
@@ -73,79 +50,60 @@ class Check_In_out : AppCompatActivity() {
             finish()
             return
         }
+        tvProjectName = findViewById(R.id.tvProjectName)
+        btnCheckIn = findViewById(R.id.btnCheckIn)
+        btnCheckOut = findViewById(R.id.btnCheckOut)
+        backBtn = findViewById<ImageView>(R.id.backBtn)
+        tvStatus = findViewById(R.id.tvStatus)
+        tvActiveTime = findViewById(R.id.tvActiveTime)
+        tvTotalTimeWorked = findViewById(R.id.tvTotalTimeWorked)
 
-        // Load project info
+        // Receive values from intent
+
         projectId = intent.getIntExtra("project_id", -1)
         projectName = intent.getStringExtra("project_name") ?: ""
+
         tvProjectName.text = projectName
-        if (projectId == -1) {
-            Toast.makeText(this, "Invalid project!", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
 
-        // Set date and location placeholder
-        updateCurrentDate()
-        tvLocation.text = "Islamabad, Pakistan"
+        // Load session from server
+        getSession()
 
-        // Initialize buttons
         btnCheckIn.setOnClickListener { startSession() }
         btnCheckOut.setOnClickListener { endSession() }
 
-        // Start timer
-        handler.post(updateTimer)
-
-        // Load total worked time from server and setup UI based on session_start
-        getTotalWorkedTime()
+        backBtn.setOnClickListener { finish() }
     }
-    private fun load_session() {
-        val queue = Volley.newRequestQueue(this)
-        val url = "$ip/load_session.php"
 
-        val stringRequest = object : StringRequest(Method.POST, url,
+    private fun getSession() {
+        val url = "$ip/get_session.php"
+        val request = object : StringRequest(Method.POST, url,
             { response ->
-                val json = JSONObject(response)
+                try {
+                    val obj = JSONObject(response)
+                    if (obj.getString("status") == "success") {
+                        sessionStart = obj.optString("session_start", null)
+                        totalSeconds = obj.optInt("total_seconds", 0)
 
-                if (json.getString("status") == "success") {
-
-                    // If session_start is NOT null => Session Active
-                    if (json.has("session_start") && !json.isNull("session_start")) {
-
-                        isSessionActive = true
-                        val sessionStartStr = json.getString("session_start")
-
-                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                        val sessionStartTime =
-                            sdf.parse(sessionStartStr)?.time ?: System.currentTimeMillis()
-
-                        // Calculate elapsed time
-                        elapsedSeconds =
-                            ((System.currentTimeMillis() - sessionStartTime) / 1000).toInt()
-
-                        // Update UI → Session Active
-                        btnCheckIn.visibility = View.GONE
-                        btnCheckOut.visibility = View.VISIBLE
-                        tvActiveTime.visibility = View.VISIBLE
-                        tvStatus.text = "Checked In"
-
+                        if (sessionStart.isNullOrEmpty() || sessionStart == "null") {
+                            showCheckIn()
+                        } else {
+                            showCheckOut()
+                            handler.post(timeRunnable)
+                        }
                     } else {
-
-                        // No active session → user must Check In
-                        isSessionActive = false
-                        elapsedSeconds = 0
-
-                        // Update UI → No Active Session
-                        btnCheckIn.visibility = View.VISIBLE
-                        btnCheckOut.visibility = View.GONE
-                        tvActiveTime.visibility = View.GONE
-                        tvStatus.text = "Not Checked In"
+                        Toast.makeText(this, obj.getString("message"), Toast.LENGTH_SHORT).show()
+                        showCheckIn()
                     }
-                } else {
-                    Toast.makeText(this, json.getString("message"), Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(this, "Error parsing session", Toast.LENGTH_SHORT).show()
+                    showCheckIn()
                 }
             },
-            {
-                Toast.makeText(this, "Failed to load session", Toast.LENGTH_SHORT).show()
+            { error ->
+                error.printStackTrace()
+                Toast.makeText(this, "Network error", Toast.LENGTH_SHORT).show()
+                showCheckIn()
             }) {
             override fun getParams(): MutableMap<String, String> {
                 return mutableMapOf(
@@ -155,29 +113,29 @@ class Check_In_out : AppCompatActivity() {
             }
         }
 
-        queue.add(stringRequest)
+        Volley.newRequestQueue(this).add(request)
     }
 
     private fun startSession() {
-        val queue = Volley.newRequestQueue(this)
         val url = "$ip/start_session.php"
-        val stringRequest = object : StringRequest(Method.POST, url,
+        val request = object : StringRequest(Method.POST, url,
             { response ->
-                val json = JSONObject(response)
-                if (json.getString("status") == "success") {
-                    Toast.makeText(this, "Checked In", Toast.LENGTH_SHORT).show()
-                    isSessionActive = true
-                    elapsedSeconds = 0
-                    tvStatus.text = "Checked In"
-                    btnCheckIn.visibility = View.GONE
-                    btnCheckOut.visibility = View.VISIBLE
-                    tvActiveTime.visibility = View.VISIBLE
-                } else {
-                    Toast.makeText(this, json.getString("message"), Toast.LENGTH_SHORT).show()
+                try {
+                    val obj = JSONObject(response)
+                    if (obj.getString("status") == "success") {
+                        Toast.makeText(this, "Checked In", Toast.LENGTH_SHORT).show()
+                        getSession()
+                    } else {
+                        Toast.makeText(this, obj.getString("message"), Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(this, "Error starting session", Toast.LENGTH_SHORT).show()
                 }
             },
             { error ->
-                Toast.makeText(this, "Network error!", Toast.LENGTH_SHORT).show()
+                error.printStackTrace()
+                Toast.makeText(this, "Network error", Toast.LENGTH_SHORT).show()
             }) {
             override fun getParams(): MutableMap<String, String> {
                 return mutableMapOf(
@@ -186,31 +144,34 @@ class Check_In_out : AppCompatActivity() {
                 )
             }
         }
-        queue.add(stringRequest)
+
+        Volley.newRequestQueue(this).add(request)
     }
 
     private fun endSession() {
-        val queue = Volley.newRequestQueue(this)
         val url = "$ip/end_session.php"
-        val stringRequest = object : StringRequest(Method.POST, url,
+        val request = object : StringRequest(Method.POST, url,
             { response ->
-                val json = JSONObject(response)
-                if (json.getString("status") == "success") {
-                    Toast.makeText(this, "Checked Out", Toast.LENGTH_SHORT).show()
-                    isSessionActive = false
-                    totalSeconds += elapsedSeconds
-                    elapsedSeconds = 0
-                    tvActiveTime.visibility = View.GONE
-                    tvStatus.text = "Not Checked In"
-                    btnCheckIn.visibility = View.VISIBLE
-                    btnCheckOut.visibility = View.GONE
-                    getTotalWorkedTime() // refresh total from server
-                } else {
-                    Toast.makeText(this, json.getString("message"), Toast.LENGTH_SHORT).show()
+                try {
+                    val obj = JSONObject(response)
+                    if (obj.getString("status") == "success") {
+                        Toast.makeText(this, "Checked Out", Toast.LENGTH_SHORT).show()
+                        sessionStart = null
+                        totalSeconds = obj.optInt("total_seconds", 0)
+                        showCheckIn()
+                        handler.removeCallbacks(timeRunnable)
+                        updateTotalTime()
+                    } else {
+                        Toast.makeText(this, obj.getString("message"), Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(this, "Error ending session", Toast.LENGTH_SHORT).show()
                 }
             },
             { error ->
-                Toast.makeText(this, "Network error!", Toast.LENGTH_SHORT).show()
+                error.printStackTrace()
+                Toast.makeText(this, "Network error", Toast.LENGTH_SHORT).show()
             }) {
             override fun getParams(): MutableMap<String, String> {
                 return mutableMapOf(
@@ -219,70 +180,57 @@ class Check_In_out : AppCompatActivity() {
                 )
             }
         }
-        queue.add(stringRequest)
+
+        Volley.newRequestQueue(this).add(request)
     }
 
-    private fun getTotalWorkedTime() {
-        val queue = Volley.newRequestQueue(this)
-        val url = "$ip/get_total_hours.php?user_id=$userId&project_id=$projectId"
-        val stringRequest = StringRequest(Request.Method.GET, url,
-            { response ->
-                val json = JSONObject(response)
-                if (json.getString("status") == "success") {
-                    totalSeconds = json.getInt("total_seconds")
-                    tvTotalTimeWorked.text = "Total Worked: ${formatTime(totalSeconds)}"
-
-                    // Check if session_start exists
-                    if (json.has("session_start") && !json.isNull("session_start")) {
-                        isSessionActive = true
-                        val sessionStartStr = json.getString("session_start")
-                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                        val sessionStartTime = sdf.parse(sessionStartStr)?.time ?: System.currentTimeMillis()
-                        elapsedSeconds = ((System.currentTimeMillis() - sessionStartTime) / 1000).toInt()
-
-                        // Update UI for active session
-                        btnCheckIn.visibility = View.GONE
-                        btnCheckOut.visibility = View.VISIBLE
-                        tvActiveTime.visibility = View.VISIBLE
-                        tvStatus.text = "Checked In"
-                    } else {
-                        // No active session
-                        isSessionActive = false
-                        elapsedSeconds = 0
-                        btnCheckIn.visibility = View.VISIBLE
-                        btnCheckOut.visibility = View.GONE
-                        tvActiveTime.visibility = View.GONE
-                        tvStatus.text = "Not Checked In"
-                    }
-                } else {
-                    Toast.makeText(this, json.getString("message"), Toast.LENGTH_SHORT).show()
-                }
-            },
-            { error ->
-                Toast.makeText(this, "Failed to fetch total time", Toast.LENGTH_SHORT).show()
-            })
-        queue.add(stringRequest)
+    private fun showCheckIn() {
+        btnCheckIn.visibility = android.view.View.VISIBLE
+        btnCheckOut.visibility = android.view.View.GONE
+        tvStatus.text = "Not Checked In"
+        tvActiveTime.visibility = android.view.View.GONE
+        updateTotalTime()
     }
 
-    private fun formatTime(seconds: Int): String {
-        val h = seconds / 3600
-        val m = (seconds % 3600) / 60
-        val s = seconds % 60
-        return String.format("%02d:%02d:%02d", h, m, s)
+    private fun showCheckOut() {
+        btnCheckIn.visibility = android.view.View.GONE
+        btnCheckOut.visibility = android.view.View.VISIBLE
+        tvStatus.text = "Checked In"
+        tvActiveTime.visibility = android.view.View.VISIBLE
+        updateTotalTime()
     }
 
-    private fun updateCurrentTime() {
-        val sdf = SimpleDateFormat("hh:mm:ss a", Locale.getDefault())
-        tvTime.text = sdf.format(Date())
+    private fun updateActiveTime() {
+        if (!sessionStart.isNullOrEmpty()) {
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val startTime = sdf.parse(sessionStart!!)
+            val now = Date()
+            val duration = ((now.time - startTime.time) / 1000).toInt()
+            val hours = duration / 3600
+            val minutes = (duration % 3600) / 60
+            val seconds = duration % 60
+            tvActiveTime.text = "Active Time: %02dh %02dm %02ds".format(hours, minutes, seconds)
+        }
+        updateTotalTime()
     }
 
-    private fun updateCurrentDate() {
-        val sdf = SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault())
-        tvDate.text = sdf.format(Date())
+    private fun updateTotalTime() {
+        val total = if (!sessionStart.isNullOrEmpty()) {
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val startTime = sdf.parse(sessionStart!!)
+            totalSeconds + ((Date().time - startTime.time) / 1000).toInt()
+        } else {
+            totalSeconds
+        }
+
+        val hours = total / 3600
+        val minutes = (total % 3600) / 60
+        val seconds = total % 60
+        tvTotalTimeWorked.text = "Total Worked: %02d:%02d:%02d".format(hours, minutes, seconds)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacks(updateTimer)
+        handler.removeCallbacks(timeRunnable)
     }
 }

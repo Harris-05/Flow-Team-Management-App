@@ -16,7 +16,6 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import de.hdodenhof.circleimageview.CircleImageView
-import org.json.JSONArray
 import org.json.JSONObject
 
 class manage_project_page : AppCompatActivity() {
@@ -29,10 +28,10 @@ class manage_project_page : AppCompatActivity() {
     private lateinit var rvTasks: RecyclerView
     private lateinit var btnMembers: RelativeLayout
     private lateinit var fabCreateTask: FloatingActionButton
-
     private lateinit var projectPfp: CircleImageView
 
     private var ip = IP_String().IP
+    private var isManagerOrOwner = false   // NEW flag set in checkUserRole()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,13 +49,8 @@ class manage_project_page : AppCompatActivity() {
         projectPfp = findViewById(R.id.projectPfp)
 
         rvTasks.layoutManager = LinearLayoutManager(this)
-
-        // Hide FAB by default
         fabCreateTask.hide()
 
-
-
-        // Get project ID
         val projectId = intent.getIntExtra("project_id", -1)
         if (projectId == -1) {
             Toast.makeText(this, "Invalid Project!", Toast.LENGTH_SHORT).show()
@@ -70,21 +64,18 @@ class manage_project_page : AppCompatActivity() {
             startActivity(intent)
         }
 
-
         // Load project details
         loadProjectDetails(projectId)
-        fetchActiveTasks(projectId)
-        // Check permissions (owner/manager can create tasks)
+
+        // Determine role (this will call fetchActiveTasks after role is known)
         checkUserRole(projectId)
 
-        // Members page
         btnMembers.setOnClickListener {
             val intent = Intent(this, project_members_page::class.java)
             intent.putExtra("project_id", projectId)
             startActivity(intent)
         }
 
-        // Create Task page
         fabCreateTask.setOnClickListener {
             val intent = Intent(this, create_task::class.java)
             intent.putExtra("project_id", projectId)
@@ -99,14 +90,11 @@ class manage_project_page : AppCompatActivity() {
         val url = ip + "get_project_details.php"
         val queue = Volley.newRequestQueue(this)
 
-        val json = JSONObject().apply {
-            put("projectId", projectId)
-        }
+        val json = JSONObject().apply { put("projectId", projectId) }
 
         val request = JsonObjectRequest(Request.Method.POST, url, json,
             { response ->
                 if (response.getBoolean("success")) {
-
                     val name = response.getString("name")
                     val description = response.getString("description")
                     val ownerName = response.getString("owner_name")
@@ -118,7 +106,7 @@ class manage_project_page : AppCompatActivity() {
                     tvOwner.text = ownerName
                     tvJoinCode.text = if (currentUserId == ownerId) joinCode else "******"
 
-                    // --- NEW: load project picture ---
+                    // load project picture if present
                     if (response.has("picture_base64") && !response.isNull("picture_base64")) {
                         val base64String = response.getString("picture_base64")
                         if (base64String.isNotEmpty()) {
@@ -128,7 +116,6 @@ class manage_project_page : AppCompatActivity() {
                                 projectPfp.setImageBitmap(bitmap)
                             } catch (e: Exception) {
                                 e.printStackTrace()
-                                // Optional: fallback image if decoding fails
                                 projectPfp.setImageResource(R.drawable.placeholder_pfp)
                             }
                         } else {
@@ -137,7 +124,6 @@ class manage_project_page : AppCompatActivity() {
                     } else {
                         projectPfp.setImageResource(R.drawable.placeholder_pfp)
                     }
-
                 } else {
                     Toast.makeText(this, "Failed to load project", Toast.LENGTH_SHORT).show()
                 }
@@ -149,10 +135,60 @@ class manage_project_page : AppCompatActivity() {
         queue.add(request)
     }
 
+    /** CHECK USER ROLE AND THEN LOAD APPROPRIATE TASKS */
+    private fun checkUserRole(projectId: Int) {
+        val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
+        val currentUserId = prefs.getInt("id", -1)
 
+        val url = ip + "get_project_members.php"
+        val queue = Volley.newRequestQueue(this)
+
+        val json = JSONObject().apply { put("project_id", projectId) }
+
+        val request = JsonObjectRequest(Request.Method.POST, url, json,
+            { response ->
+                if (!response.getBoolean("success")) {
+                    // still attempt to fetch tasks as 'member' if api failed
+                    isManagerOrOwner = false
+                    fetchActiveTasks(projectId)
+                    return@JsonObjectRequest
+                }
+
+                val members = response.getJSONArray("members")
+
+                for (i in 0 until members.length()) {
+                    val member = members.getJSONObject(i)
+
+                    if (member.getInt("user_id") == currentUserId) {
+                        val role = member.getString("role")
+                        if (role == "owner" || role == "manager") {
+                            fabCreateTask.show()
+                            isManagerOrOwner = true
+                        }
+                        break
+                    }
+                }
+
+                // After knowing role -> fetch tasks
+                fetchActiveTasks(projectId)
+
+            },
+            {
+                Toast.makeText(this, "Failed to verify role", Toast.LENGTH_SHORT).show()
+                // fallback: still fetch tasks as non-manager
+                isManagerOrOwner = false
+                fetchActiveTasks(projectId)
+            })
+
+        queue.add(request)
+    }
+
+    /** FETCH TASKS BASED ON ROLE */
     /** FETCH ACTIVE TASKS OF THIS PROJECT */
     private fun fetchActiveTasks(projectId: Int) {
 
+        val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
+        val currentUserId = prefs.getInt("id", -1)
         val url = ip + "get_project_active_tasks.php"
         val queue = Volley.newRequestQueue(this)
 
@@ -174,6 +210,18 @@ class manage_project_page : AppCompatActivity() {
                 for (i in 0 until tasksArray.length()) {
                     val obj = tasksArray.getJSONObject(i)
 
+                    val assignedTo = obj.getInt("assigned_to")
+                    val taskOwnerId = obj.getInt("assigned_by") // Optional, can use owner check
+
+                    // Show only tasks for current user if not owner/manager
+                    // Assume currentUser is owner/manager if currentUserId == projectOwnerId
+                    val projectOwnerId = obj.optInt("project_owner_id", -1)
+                    val isOwnerOrManager = currentUserId == projectOwnerId
+
+                    if (!isOwnerOrManager && assignedTo != currentUserId) {
+                        continue
+                    }
+
                     val task = TaskModel(
                         id = obj.getInt("id"),
                         title = obj.getString("title"),
@@ -185,59 +233,26 @@ class manage_project_page : AppCompatActivity() {
                         updateRequested = obj.optInt("update_requested", 0) == 1,
                         dueDate = obj.optString("deadline", ""),
                         percentageCompleted = obj.optInt("completion", 0),
-                        assignedByName = ""
+                        assignedByName = "" // will fetch if needed
                     )
 
                     taskList.add(task)
                 }
 
-               // rvTasks.adapter = TaskAdapter(taskList)
+                // Set adapter with click listener
+                rvTasks.adapter = TaskAdapter(taskList, { task ->
+                    val intent = Intent(this, Task_Details::class.java)
+                    intent.putExtra("task_id", task.id)
+                    startActivity(intent)
+                }, IP_String().IP)
+
+
             },
             {
                 Toast.makeText(this, "Failed to fetch tasks", Toast.LENGTH_SHORT).show()
-                Log.e("API_FETCH_TASKS", "Failed to fetch tasks: ${it.message}")
             })
 
         queue.add(request)
     }
 
-    /** CHECK USER ROLE IN PROJECT */
-    private fun checkUserRole(projectId: Int) {
-        val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
-        val currentUserId = prefs.getInt("id", -1)
-
-        val url = ip + "get_project_members.php"
-        val queue = Volley.newRequestQueue(this)
-
-        val json = JSONObject().apply {
-            put("project_id", projectId)
-        }
-
-        val request = JsonObjectRequest(Request.Method.POST, url, json,
-            { response ->
-                if (!response.getBoolean("success")) return@JsonObjectRequest
-
-                val members = response.getJSONArray("members")
-
-                var userRole = ""
-
-                for (i in 0 until members.length()) {
-                    val member = members.getJSONObject(i)
-                    if (member.getInt("user_id") == currentUserId) {
-                        userRole = member.getString("role")
-                        break
-                    }
-                }
-
-                // Only Owner OR Manager can create tasks
-                if (userRole == "owner" || userRole == "manager") {
-                    fabCreateTask.show()
-                }
-            },
-            {
-                Toast.makeText(this, "Failed to verify role", Toast.LENGTH_SHORT).show()
-            })
-
-        queue.add(request)
-    }
 }
