@@ -10,5 +10,6 @@ data class PendingProjectEntity(
     val name: String,
     val description: String,
     val joinCode: String,
-    val pictureUrl: String = ""
+    val picturePath: String = ""    // store file path, not base64
 )
+

@@ -12,7 +12,7 @@ import androidx.room.RoomDatabase
         TaskEntity::class,
         PendingTaskEntity::class    // Make sure PendingTaskEntity is included
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -32,9 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "flow_local.db"
-                )
-                    // WARNING: fallbackToDestructiveMigration will wipe all data if version changes
-                    .fallbackToDestructiveMigration()
+                ).fallbackToDestructiveMigration()
                     .build()
                     .also { INSTANCE = it }
             }

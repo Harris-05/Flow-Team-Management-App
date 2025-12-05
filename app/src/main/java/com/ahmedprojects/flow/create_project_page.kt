@@ -25,6 +25,8 @@ import android.util.Base64
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 
 
@@ -37,7 +39,7 @@ class create_project_page : AppCompatActivity() {
     private lateinit var ivProjectImage: ImageView
 
     private var ip: IP_String = IP_String()
-    private var selectedImageBase64: String? = null
+    private var selectedImagePath: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,10 +68,9 @@ class create_project_page : AppCompatActivity() {
                 val imageUri: Uri? = data?.data
                 imageUri?.let { uri ->
                     ivProjectImage.setImageURI(uri)  // preview
-
-                    // Convert to Base64
-                    selectedImageBase64 = convertUriToBase64(uri)
+                    selectedImagePath = saveUriImageToInternal(uri)
                 }
+
             }
         }
 
@@ -88,7 +89,7 @@ class create_project_page : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            createProject(userId, name, description, selectedImageBase64)
+            createProject(userId, name, description, selectedImagePath)
         }
     }
 
@@ -97,7 +98,7 @@ class create_project_page : AppCompatActivity() {
             val inputStream: InputStream? = contentResolver.openInputStream(uri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
             val outputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
             val bytes = outputStream.toByteArray()
             Base64.encodeToString(bytes, Base64.NO_WRAP)
         } catch (e: Exception) {
@@ -119,7 +120,7 @@ class create_project_page : AppCompatActivity() {
                         name = name,
                         description = description,
                         joinCode = joinCode,
-                        pictureUrl = base64Image ?: ""
+                        picturePath = selectedImagePath ?: ""
                     )
                 )
                 Toast.makeText(this@create_project_page, "Saved offline. Will sync later.", Toast.LENGTH_SHORT).show()
@@ -142,7 +143,12 @@ class create_project_page : AppCompatActivity() {
             put("name", name)
             put("description", description)
             put("joinCode", joinCode)
-            put("picture_base64", base64Image ?: "")
+            if (!selectedImagePath.isNullOrEmpty()) {
+                val b64 = fileToBase64(selectedImagePath!!)
+                put("picture_base64", b64 ?: "")
+            } else {
+                put("picture_base64", "")
+            }
         }
 
         val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
@@ -161,9 +167,10 @@ class create_project_page : AppCompatActivity() {
                             name = name,
                             description = description,
                             joinCode = joinCode,
-                            pictureUrl = base64Image ?: ""
+                            picturePath = selectedImagePath ?: ""
                         )
                     )
+
                     finish()
                 }
             })
@@ -175,4 +182,59 @@ class create_project_page : AppCompatActivity() {
         val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         return cm.activeNetwork != null
     }
+
+    private fun saveUriImageToInternal(uri: Uri): String? {
+        return try {
+            // read bitmap with sampling/resizing if necessary
+            val input = contentResolver.openInputStream(uri) ?: return null
+            var bitmap = BitmapFactory.decodeStream(input)
+            input.close()
+
+            // Resize to max width/height (preserve aspect) to keep size small
+            val maxDim = 1024
+            val (w, h) = bitmap.width to bitmap.height
+            if (w > maxDim || h > maxDim) {
+                val ratio = w.toFloat() / h.toFloat()
+                val newW: Int
+                val newH: Int
+                if (ratio > 1) { // width > height
+                    newW = maxDim
+                    newH = (maxDim / ratio).toInt()
+                } else {
+                    newH = maxDim
+                    newW = (maxDim * ratio).toInt()
+                }
+                bitmap = Bitmap.createScaledBitmap(bitmap, newW, newH, true)
+            }
+
+            // compress to JPEG 80% (smaller than PNG)
+            val fileName = "proj_img_${System.currentTimeMillis()}.jpg"
+            val file = File(filesDir, fileName)
+            val fos = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos)
+            fos.flush()
+            fos.close()
+
+            file.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun fileToBase64(path: String): String? {
+        return try {
+            val file = File(path)
+            if (!file.exists()) return null
+            val bytes = file.readBytes()
+            android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+
+
+
 }

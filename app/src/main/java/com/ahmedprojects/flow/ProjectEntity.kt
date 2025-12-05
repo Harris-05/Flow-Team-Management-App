@@ -12,5 +12,6 @@ data class ProjectEntity(
     val joinCode: String,
     val role: String,
     val membersCount: Int,
-    val pictureBase64: String? = null // new column
+    val picturePath: String? = null
 )
+

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Base64
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
+import java.io.File
 import kotlin.coroutines.resume
 
 class NetworkReceiver : BroadcastReceiver() {
@@ -59,7 +61,14 @@ class NetworkReceiver : BroadcastReceiver() {
                 put("name", p.name)
                 put("description", p.description)
                 put("joinCode", p.joinCode)
+                if (!p.picturePath.isNullOrEmpty()) {
+                    val b64 = try { File(p.picturePath).readBytes().let { Base64.encodeToString(it, Base64.NO_WRAP) } } catch(e:Exception){ "" }
+                    put("picture_base64", b64)
+                } else {
+                    put("picture_base64", "")
+                }
             }
+
 
             suspendCancellableCoroutine<Boolean> { cont ->
                 val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
