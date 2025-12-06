@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.google.firebase.auth.FirebaseAuth
 import org.json.JSONObject
 
 class login : AppCompatActivity() {
@@ -22,9 +23,13 @@ class login : AppCompatActivity() {
     private val BASE_URL = IP_String().IP   // <-- USING YOUR GLOBAL CLASS
     private val LOGIN_URL = BASE_URL + "login.php"
 
+    private lateinit var firebaseAuth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
+
+        firebaseAuth = FirebaseAuth.getInstance() // Initialize Firebase Auth
 
         emailInput = findViewById(R.id.input_email)
         passwordInput = findViewById(R.id.input_password)
@@ -50,55 +55,65 @@ class login : AppCompatActivity() {
         loginBtn.isEnabled = false
         loginBtn.text = "Logging in..."
 
-        val queue = Volley.newRequestQueue(this)
+        // ------------------- Firebase Login -------------------
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(this, "Firebase Login Successful", Toast.LENGTH_SHORT).show()
 
-        // --- Create JSON payload ---
-        val jsonBody = JSONObject()
-        jsonBody.put("email", email)
-        jsonBody.put("password", password)
+                    // ------------------- Continue Local Login -------------------
+                    val queue = Volley.newRequestQueue(this)
 
-        val request = JsonObjectRequest(
-            Request.Method.POST,
-            LOGIN_URL,
-            jsonBody,
-            { response ->
-                try {
-                    if (response.getBoolean("success")) {
-                        Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
+                    val jsonBody = JSONObject()
+                    jsonBody.put("email", email)
+                    jsonBody.put("password", password)
 
-                        // Save session
-                        val user = response.getJSONObject("user")
-                        val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
-                        prefs.edit().apply {
-                            putInt("id", user.getInt("id"))
-                            putString("name", user.getString("name"))
-                            putString("email", user.getString("email"))
-                            apply()
+                    val request = JsonObjectRequest(
+                        Request.Method.POST,
+                        LOGIN_URL,
+                        jsonBody,
+                        { response ->
+                            try {
+                                if (response.getBoolean("success")) {
+                                    Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
+
+                                    val user = response.getJSONObject("user")
+                                    val prefs = getSharedPreferences("user_session", MODE_PRIVATE)
+                                    prefs.edit().apply {
+                                        putInt("id", user.getInt("id"))
+                                        putString("name", user.getString("name"))
+                                        putString("email", user.getString("email"))
+                                        apply()
+                                    }
+
+                                    startActivity(Intent(this, home_page::class.java))
+                                    finish()
+                                } else {
+                                    Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
+                                Toast.makeText(this, "Invalid server response", Toast.LENGTH_SHORT).show()
+                                Log.d("PAKROMUJHE", "Invalid server response: $e")
+                            }
+
+                            loginBtn.isEnabled = true
+                            loginBtn.text = "Login"
+                        },
+                        { error ->
+                            Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
+                            Log.d("PAKROMUJHE", "Network error: ${error.message}")
+                            loginBtn.isEnabled = true
+                            loginBtn.text = "Login"
                         }
+                    )
 
-                        startActivity(Intent(this, home_page::class.java))
-                        finish()
-                    } else {
-                        Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Invalid server response", Toast.LENGTH_SHORT).show()
-                    Log.d("PAKROMUJHE", "Invalid server response: $e")
+                    queue.add(request)
+
+                } else {
+                    Toast.makeText(this, "Firebase Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    loginBtn.isEnabled = true
+                    loginBtn.text = "Login"
                 }
-
-                loginBtn.isEnabled = true
-                loginBtn.text = "Login"
-            },
-            { error ->
-                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
-                Log.d("PAKROMUJHE", "Network error: ${error.message}")
-                loginBtn.isEnabled = true
-                loginBtn.text = "Login"
             }
-        )
-
-        // --- Add request to queue ---
-        queue.add(request)
     }
 }

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.google.firebase.auth.FirebaseAuth
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 
@@ -30,9 +31,15 @@ class sign_up_page : AppCompatActivity() {
     private val BASE_URL = IP_String().IP
     private val SIGNUP_URL = BASE_URL + "signup.php"
 
+    // Firebase Auth instance
+    private lateinit var firebaseAuth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sign_up_page)
+
+        // Initialize Firebase Auth
+        firebaseAuth = FirebaseAuth.getInstance()
 
         fullNameInput = findViewById(R.id.input_fullname)
         emailInput = findViewById(R.id.input_email)
@@ -43,14 +50,9 @@ class sign_up_page : AppCompatActivity() {
         profileImage = findViewById(R.id.profileImage)
         signinLink = findViewById(R.id.signin_link)
 
-        // Open Gallery for profile image
-        profileImage.setOnClickListener {
-            selectImage()
-        }
+        profileImage.setOnClickListener { selectImage() }
 
-        createAccountBtn.setOnClickListener {
-            signupUser()
-        }
+        createAccountBtn.setOnClickListener { signupUser() }
 
         signinLink.setOnClickListener {
             startActivity(Intent(this, login::class.java))
@@ -107,36 +109,51 @@ class sign_up_page : AppCompatActivity() {
         createAccountBtn.isEnabled = false
         createAccountBtn.text = "Creating Account..."
 
-        val jsonData = JSONObject()
-        jsonData.put("name", fullName)
-        jsonData.put("email", email)
-        jsonData.put("password", password)
-        jsonData.put("profile_photo", selectedImageBase64 ?: JSONObject.NULL)
+        // ------------------- Firebase Signup -------------------
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Firebase signup success
+                    Toast.makeText(this, "Firebase Account created!", Toast.LENGTH_SHORT).show()
 
-        val request = JsonObjectRequest(
-            Request.Method.POST,
-            SIGNUP_URL,
-            jsonData,
-            { response ->
+                    // Now continue to save data to your local PHP API
+                    val jsonData = JSONObject()
+                    jsonData.put("name", fullName)
+                    jsonData.put("email", email)
+                    jsonData.put("password", password)
+                    jsonData.put("profile_photo", selectedImageBase64 ?: JSONObject.NULL)
 
-                if (response.getBoolean("success")) {
-                    Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, login::class.java))
-                    finish()
+                    val request = JsonObjectRequest(
+                        Request.Method.POST,
+                        SIGNUP_URL,
+                        jsonData,
+                        { response ->
+                            if (response.getBoolean("success")) {
+                                Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, login::class.java))
+                                finish()
+                            } else {
+                                Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT).show()
+                            }
+
+                            createAccountBtn.isEnabled = true
+                            createAccountBtn.text = "Create Account"
+                        },
+                        { error ->
+                            Toast.makeText(this, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                            createAccountBtn.isEnabled = true
+                            createAccountBtn.text = "Create Account"
+                        }
+                    )
+
+                    Volley.newRequestQueue(this).add(request)
+
                 } else {
-                    Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT).show()
+                    // Firebase signup failed
+                    Toast.makeText(this, "Firebase Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    createAccountBtn.isEnabled = true
+                    createAccountBtn.text = "Create Account"
                 }
-
-                createAccountBtn.isEnabled = true
-                createAccountBtn.text = "Create Account"
-            },
-            { error ->
-                Toast.makeText(this, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-                createAccountBtn.isEnabled = true
-                createAccountBtn.text = "Create Account"
             }
-        )
-
-        Volley.newRequestQueue(this).add(request)
     }
 }
