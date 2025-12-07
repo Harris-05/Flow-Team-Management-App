@@ -106,4 +106,16 @@
         android:layout_gravity="center_vertical"
         app:tint="#B7C2D6" />
 
+    <!-- Add inside the main LinearLayout, after the arrow ImageView -->
+    <ImageView
+        android:id="@+id/btnDeleteProject"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_delete"
+        android:layout_marginStart="8dp"
+        app:tint="#FF3B30"
+        android:contentDescription="Delete project"/>
+
+
 </LinearLayout>

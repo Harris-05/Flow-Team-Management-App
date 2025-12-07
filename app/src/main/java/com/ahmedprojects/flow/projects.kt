@@ -57,15 +57,6 @@ class projects : AppCompatActivity() {
         // etc.
         // then simply use findViewById(R.id.homeBtn)
 
-        adapter = ProjectAdapter(projectList) { clickedProject ->
-            val intent = Intent(this, manage_project_page::class.java)
-            intent.putExtra("project_id", clickedProject.id)
-            startActivity(intent)
-
-        }
-
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
 
 
         // --- Load user's projects ---
@@ -77,6 +68,22 @@ class projects : AppCompatActivity() {
             return
         }
         loadUserProjects(userId)
+
+        adapter = ProjectAdapter(projectList,
+            onProjectClick = { clickedProject ->
+                val intent = Intent(this, manage_project_page::class.java)
+                intent.putExtra("project_id", clickedProject.id)
+                startActivity(intent)
+            },
+            onDeleteClick = { project ->
+                deleteProject(userId, project.id)
+            }
+        )
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+
 
         // --- Join project functionality ---
         joinBtn.setOnClickListener {
@@ -116,8 +123,6 @@ class projects : AppCompatActivity() {
         }
 
     }
-
-
 
 
     private fun loadUserProjects(userId: Int) {
@@ -246,4 +251,30 @@ class projects : AppCompatActivity() {
             })
         queue.add(request)
     }
+
+    private fun deleteProject(userId: Int, projectId: Int) {
+        val queue = Volley.newRequestQueue(this)
+        val url = ip.IP + "delete_project.php"
+
+        val jsonBody = JSONObject().apply {
+            put("userId", userId) // verify owner on server
+            put("projectId", projectId)
+        }
+
+        val request = JsonObjectRequest(Request.Method.POST, url, jsonBody,
+            { response ->
+                if (response.getBoolean("success")) {
+                    Toast.makeText(this, "Project deleted!", Toast.LENGTH_SHORT).show()
+                    loadUserProjects(userId)
+                } else {
+                    Toast.makeText(this, response.getString("message"), Toast.LENGTH_SHORT).show()
+                }
+            },
+            { error ->
+                Toast.makeText(this, "Network error: ${error.message}", Toast.LENGTH_SHORT).show()
+            })
+
+        queue.add(request)
+    }
+
 }

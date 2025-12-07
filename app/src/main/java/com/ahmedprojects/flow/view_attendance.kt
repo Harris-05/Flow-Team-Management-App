@@ -49,27 +49,43 @@ class view_attendance : AppCompatActivity() {
 
     private fun fetchTotalHours() {
         val url = "$ip/get_member_total_hours.php?user_id=$userId&project_id=$projectId"
-
         val queue = Volley.newRequestQueue(this)
 
         val request = StringRequest(
             Request.Method.GET, url,
             { response ->
-                val json = JSONObject(response)
+                try {
+                    // Log the response for debugging
+                    println("Server response: $response")
 
-                if (json.getString("status") == "success") {
-                    val totalSeconds = json.getInt("total_seconds")
-                    tvTotalHours.text = formatTime(totalSeconds)
-                } else {
-                    Toast.makeText(this, "Failed to load", Toast.LENGTH_SHORT).show()
+                    // Make sure the response starts with { to avoid HTML pages
+                    if (!response.trim().startsWith("{")) {
+                        Toast.makeText(this, "Invalid server response", Toast.LENGTH_SHORT).show()
+                        return@StringRequest
+                    }
+
+                    val json = JSONObject(response)
+
+                    if (json.getString("status") == "success") {
+                        val totalSeconds = json.getInt("total_seconds")
+                        tvTotalHours.text = formatTime(totalSeconds)
+                    } else {
+                        Toast.makeText(this, "Failed to load hours", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(this, "Error parsing response", Toast.LENGTH_SHORT).show()
                 }
             },
-            {
+            { error ->
+                error.printStackTrace()
                 Toast.makeText(this, "Network Error!", Toast.LENGTH_SHORT).show()
             }
         )
+
         queue.add(request)
     }
+
 
     private fun formatTime(seconds: Int): String {
         val h = seconds / 3600

@@ -29,13 +29,17 @@ class Select_project : AppCompatActivity() {
         recyclerView = findViewById(R.id.orgRecycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = ProjectAdapter(projectList) { selectedProject ->
-            // When user selects a project → go to attendance page
-            val intent = Intent(this, Check_In_out::class.java)
-            intent.putExtra("project_id", selectedProject.id)
-            intent.putExtra("project_name", selectedProject.name)
-            startActivity(intent)
-        }
+        adapter = ProjectAdapter(
+            projectList,
+            onProjectClick = { selectedProject ->
+                // When user selects a project → go to attendance page
+                val intent = Intent(this, Check_In_out::class.java)
+                intent.putExtra("project_id", selectedProject.id)
+                intent.putExtra("project_name", selectedProject.name)
+                startActivity(intent)
+            },
+            onDeleteClick = { /* no-op */ } // just pass empty lambda since delete is not needed here
+        )
 
         recyclerView.adapter = adapter
 

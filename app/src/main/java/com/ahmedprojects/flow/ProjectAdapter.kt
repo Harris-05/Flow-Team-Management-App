@@ -5,13 +5,15 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.hdodenhof.circleimageview.CircleImageView
 
 class ProjectAdapter(
     private val projectList: List<Project>,
-    private val onProjectClick: (Project) -> Unit
+    private val onProjectClick: (Project) -> Unit,
+    private val onDeleteClick: (Project) -> Unit
 ) : RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
 
     class ProjectViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -20,6 +22,7 @@ class ProjectAdapter(
         val orgRoleBadge: TextView = view.findViewById(R.id.orgRoleBadge)
         val orgDescription: TextView = view.findViewById(R.id.orgDescription)
         val orgMembers: TextView = view.findViewById(R.id.orgMembers)
+        val btnDelete: ImageView = view.findViewById(R.id.btnDeleteProject) // new
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectViewHolder {
@@ -36,25 +39,29 @@ class ProjectAdapter(
         holder.orgDescription.text = project.description
         holder.orgMembers.text = project.membersCount.toString()
 
-        // Decode and display project image if available
         if (!project.pictureUrl.isNullOrEmpty()) {
             try {
                 val decodedBytes = Base64.decode(project.pictureUrl, Base64.NO_WRAP)
                 val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 holder.orgLogo.setImageBitmap(bitmap)
             } catch (e: Exception) {
-                // fallback image if decoding fails
                 holder.orgLogo.setImageResource(R.drawable.org_logo_placeholder)
             }
         } else {
-            // default placeholder
             holder.orgLogo.setImageResource(R.drawable.org_logo_placeholder)
         }
 
-        // CLICK EVENT
         holder.itemView.setOnClickListener {
             onProjectClick(project)
         }
+
+        // DELETE BUTTON
+        holder.btnDelete.setOnClickListener {
+            onDeleteClick(project)
+        }
+
+        // Only show delete button if user is owner
+        holder.btnDelete.visibility = if (project.role == "owner") View.VISIBLE else View.GONE
     }
 
     override fun getItemCount(): Int = projectList.size
