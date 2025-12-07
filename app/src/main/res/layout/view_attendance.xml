@@ -18,19 +18,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 🧑 Employee Name (Subtitle) -->
+    <!-- 🕓 View Attendance Title -->
     <TextView
+        android:id="@+id/tvViewAttendanceTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="View Attendance"
-        android:textSize="20sp"
+        android:textSize="30sp"
         android:textStyle="bold"
         android:textColor="@android:color/white"
         android:gravity="center"
-        android:paddingTop="28dp"
         app:layout_constraintTop_toTopOf="@id/topBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tvEmployeeName"
+        android:paddingTop="24dp"
+        android:fontFamily="@font/poppins_medium"/>
+
+    <!-- 🧑 Employee Name (Subtitle) -->
     <TextView
         android:id="@+id/tvEmployeeName"
         android:layout_width="0dp"
@@ -40,8 +45,11 @@
         android:textStyle="bold"
         android:textColor="@android:color/white"
         android:gravity="center"
-        android:paddingTop="28dp"
-        app:layout_constraintBottom_toBottomOf="@id/topBar"/>
+        app:layout_constraintBottom_toBottomOf="@id/topBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingBottom="16dp"
+        android:fontFamily="@font/poppins_medium"/>
 
     <!-- 🕓 Total Time Worked Card -->
     <androidx.cardview.widget.CardView
@@ -70,7 +78,8 @@
                 android:text="Total Time Worked"
                 android:textColor="#1E293B"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:fontFamily="@font/poppins_medium"/>
 
             <TextView
                 android:id="@+id/tvTotalHours"
@@ -80,7 +89,8 @@
                 android:textColor="#475569"
                 android:textSize="26sp"
                 android:paddingTop="6dp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:fontFamily="@font/poppins_medium"/>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

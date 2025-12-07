@@ -41,19 +41,14 @@ class home_page : AppCompatActivity() {
         // Just to confirm it's working, show a toast (optional)
         Toast.makeText(this, "Logged in as: $userName (ID: $userId)", Toast.LENGTH_SHORT).show()
 
-        var pro = findViewById<ImageView>(R.id.ivNotificationButton)
-        pro.setOnClickListener {
-            Toast.makeText(this, ip.IP, Toast.LENGTH_SHORT).show()
-        }
-
         var projectsBtn = findViewById<LinearLayout>(R.id.Projects)
         var tasksBtn = findViewById<LinearLayout>(R.id.Tasks)
         var notificationsBtn = findViewById<LinearLayout>(R.id.Notifications)
-        var profileBtn = findViewById<LinearLayout>(R.id.Profile)
         var profilePic = findViewById<CircleImageView>(R.id.ivProfile)
         var greetingsName = findViewById<TextView>(R.id.tvHello)
         var chatbtn = findViewById<ImageView>(R.id.floatingChat)
         val btncheckin = findViewById<RelativeLayout>(R.id.btnCheckIn)
+        var homeBtn = findViewById<LinearLayout>(R.id.homeBtn)
 
         loadUserProfilePhoto(userId, profilePic)
         loadUserName(userId, greetingsName)
@@ -78,10 +73,13 @@ class home_page : AppCompatActivity() {
             val intent = Intent(this, notifications_page::class.java)
             startActivity(intent)
         }
-        /*profileBtn.setOnClickListener {
-            val intent = Intent(this, profile_page::class.java)
+
+        homeBtn.setOnClickListener {
+            val intent = Intent(this, home_page::class.java)
             startActivity(intent)
-        }*/
+        }
+
+
 
 
     }

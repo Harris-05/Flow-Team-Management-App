@@ -1,7 +1,9 @@
 package com.ahmedprojects.flow
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -19,6 +21,8 @@ class notifications_page : AppCompatActivity() {
     private lateinit var adapter: NotificationAdapter
     private val notificationList = mutableListOf<NotificationModel>()
     private val ip = IP_String().IP  // your base API URL
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +42,29 @@ class notifications_page : AppCompatActivity() {
         rvNotifications.adapter = adapter
 
         fetchUserInvites()
+        var tasksBtn = findViewById<LinearLayout>(R.id.tasksBtn)
+        var notificationsBtn = findViewById<LinearLayout>(R.id.notificationsBtn)
+        var homeBtn = findViewById<LinearLayout>(R.id.homeBtn)
+        var projectBtn = findViewById<LinearLayout>(R.id.projectsBtn)
+
+        projectBtn.setOnClickListener {
+            val intent = Intent(this, projects::class.java)
+            startActivity(intent)
+        }
+        tasksBtn.setOnClickListener {
+            val intent = Intent(this, tasks_page::class.java)
+            startActivity(intent)
+        }
+        notificationsBtn.setOnClickListener {
+            val intent = Intent(this, notifications_page::class.java)
+            startActivity(intent)
+        }
+
+        homeBtn.setOnClickListener {
+            val intent = Intent(this, home_page::class.java)
+            startActivity(intent)
+        }
+
     }
 
     private fun fetchUserInvites() {

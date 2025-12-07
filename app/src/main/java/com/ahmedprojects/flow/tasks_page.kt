@@ -29,6 +29,11 @@ class tasks_page : AppCompatActivity() {
     private var userId = -1
     private val IP = IP_String().IP
 
+    private lateinit var homeBtn: LinearLayout
+    private lateinit var projectsBtn: LinearLayout
+    private lateinit var tasksBtn: LinearLayout
+    private lateinit var notificationsBtn: LinearLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -42,6 +47,34 @@ class tasks_page : AppCompatActivity() {
         setupStatusFilters()
 
         loadTasksOfflineThenOnline()
+
+        homeBtn = findViewById(R.id.homeBtn)
+        projectsBtn = findViewById(R.id.projectsBtn)
+        tasksBtn = findViewById(R.id.tasksBtn)
+        notificationsBtn = findViewById(R.id.notificationsBtn)
+
+
+        homeBtn.setOnClickListener {
+            val intent = Intent(this, home_page::class.java)
+            startActivity(intent)
+        }
+
+        projectsBtn.setOnClickListener {
+            val intent = Intent(this, projects::class.java)
+            startActivity(intent)
+        }
+
+        tasksBtn.setOnClickListener {
+            val intent = Intent(this, tasks_page::class.java)
+            startActivity(intent)
+        }
+
+        notificationsBtn.setOnClickListener {
+            val intent = Intent(this, notifications_page::class.java)
+            startActivity(intent)
+        }
+
+
     }
 
     private fun setupBottomNav() {

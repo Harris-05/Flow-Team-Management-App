@@ -35,7 +35,6 @@ class projects : AppCompatActivity() {
     private lateinit var projectsBtn: LinearLayout
     private lateinit var tasksBtn: LinearLayout
     private lateinit var notificationsBtn: LinearLayout
-    private lateinit var profileBtn: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +50,6 @@ class projects : AppCompatActivity() {
         projectsBtn = findViewById(R.id.projectsBtn)
         tasksBtn = findViewById(R.id.tasksBtn)
         notificationsBtn = findViewById(R.id.notificationsBtn)
-        profileBtn = findViewById(R.id.profileBtn)
 
         // OR, if you prefer IDs, add IDs to each LinearLayout in XML:
         // android:id="@+id/homeBtn"
@@ -112,15 +110,11 @@ class projects : AppCompatActivity() {
             startActivity(intent)
         }
 
-        /*notificationsBtn.setOnClickListener {
+        notificationsBtn.setOnClickListener {
             val intent = Intent(this, notifications_page::class.java)
             startActivity(intent)
         }
 
-        profileBtn.setOnClickListener {
-            val intent = Intent(this, profile_page::class.java)
-            startActivity(intent)
-        }*/
     }
 
 
