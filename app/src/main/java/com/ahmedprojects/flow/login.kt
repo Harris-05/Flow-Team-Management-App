@@ -12,6 +12,8 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.firebase.auth.FirebaseAuth
 import org.json.JSONObject
+import com.google.firebase.messaging.FirebaseMessaging
+
 
 class login : AppCompatActivity() {
 
@@ -36,7 +38,11 @@ class login : AppCompatActivity() {
         loginBtn = findViewById(R.id.btn_login)
         signupLink = findViewById(R.id.signup_link)
 
-        loginBtn.setOnClickListener { loginUser() }
+        loginBtn.setOnClickListener {
+            loginUser()
+        }
+
+
 
         signupLink.setOnClickListener {
             startActivity(Intent(this, sign_up_page::class.java))
@@ -85,7 +91,8 @@ class login : AppCompatActivity() {
                                         putString("email", user.getString("email"))
                                         apply()
                                     }
-
+                                    val userId = user.getInt("id")
+                                    saveFcmToken(userId)
                                     startActivity(Intent(this, home_page::class.java))
                                     finish()
                                 } else {
@@ -115,5 +122,26 @@ class login : AppCompatActivity() {
                     loginBtn.text = "Login"
                 }
             }
+    }
+
+    private fun saveFcmToken(userId: Int) {
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            val url = IP_String().IP + "save_fcm_token.php"
+            val queue = Volley.newRequestQueue(this)
+
+            val json = JSONObject()
+            json.put("user_id", userId)
+            json.put("fcm_token", token)
+
+            val request = JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                json,
+                { Log.d("FCM", "Token saved") },
+                { Log.e("FCM", "Failed to save token") }
+            )
+
+            queue.add(request)
+        }
     }
 }

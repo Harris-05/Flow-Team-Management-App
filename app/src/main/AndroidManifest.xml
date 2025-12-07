@@ -15,6 +15,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Flow_Frontend_Ahmed"
         android:usesCleartextTraffic="true">
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
         <activity
             android:name=".view_attendance"
             android:exported="false" />
