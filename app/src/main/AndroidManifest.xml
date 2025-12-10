@@ -23,6 +23,18 @@
             </intent-filter>
         </service>
         <activity
+            android:name=".item_chat_image_received"
+            android:exported="false" />
+        <activity
+            android:name=".item_chat_image_sent"
+            android:exported="false" />
+        <activity
+            android:name=".item_chat_received"
+            android:exported="false" />
+        <activity
+            android:name=".item_chat_sent"
+            android:exported="false" />
+        <activity
             android:name=".view_attendance"
             android:exported="false" />
         <activity
