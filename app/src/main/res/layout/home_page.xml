@@ -66,7 +66,7 @@
                 android:id="@+id/btnCheckIn"
                 android:background="@drawable/circle_check_in"
                 android:layout_gravity="center"
-                android:translationY="220dp">
+                android:translationY="200dp">
 
                 <TextView
                     android:layout_width="wrap_content"

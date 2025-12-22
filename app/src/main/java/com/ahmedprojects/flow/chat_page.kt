@@ -495,7 +495,6 @@ class chat_page : AppCompatActivity() {
         )
         rq.add(req)
     }
-
     private fun deleteVanishMessages() {
         val sender = getCurrentUserId()
         val payload = JSONObject().apply {

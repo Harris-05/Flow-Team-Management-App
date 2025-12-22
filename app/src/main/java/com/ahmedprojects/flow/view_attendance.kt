@@ -61,7 +61,7 @@ class view_attendance : AppCompatActivity() {
 
     private fun fetchAttendanceData() {
         // We reuse the same API because it returns total_seconds + session_start
-        val url = "$ip/get_session.php"
+                                                                                                                                                                                                                    val url = "$ip/get_session.php"
 
         val queue = Volley.newRequestQueue(this)
         val request = object : StringRequest(Method.POST, url,
