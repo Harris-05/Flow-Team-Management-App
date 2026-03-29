@@ -88,7 +88,7 @@ Flow/
 │   ├── google-services.json      # Firebase configuration
 │   └── src/main/
 │       ├── AndroidManifest.xml   # Activities, services, permissions
-│       ├── java/com/ahmedprojects/flow/
+│       ├── java/com/Harris/flow/
 │       │   ├── 🔐 Auth & Session
 │       │   │   ├── splash_screen.kt
 │       │   │   ├── login.kt
@@ -183,7 +183,7 @@ Flow/
    git clone https://github.com/your-username/Flow.git
    ```
 2. Open the project in Android Studio
-3. Update the backend URL in [`IP_String.kt`](app/src/main/java/com/ahmedprojects/flow/IP_String.kt):
+3. Update the backend URL in [`IP_String.kt`](app/src/main/java/com/Harris/flow/IP_String.kt):
    ```kotlin
    val IP: String = "http://YOUR_SERVER_IP/Flow/"
    ```

@@ -7,11 +7,11 @@ plugins {
 
 
 android {
-    namespace = "com.ahmedprojects.flow"
+    namespace = "com.Harris.flow"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.ahmedprojects.flow_frontend_ahmed"
+        applicationId = "com.Harris.flow_frontend_ahmed"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
