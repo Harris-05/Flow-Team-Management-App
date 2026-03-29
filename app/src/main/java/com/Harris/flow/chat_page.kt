@@ -105,6 +105,7 @@ class chat_page : AppCompatActivity() {
             finish()
             return
         }
+        //change
 
         messageAdapter = MessageAdapter(messageList, currentUserId.toString()) { message ->
             showMessageOptionsDialog(message)
